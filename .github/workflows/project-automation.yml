@@ -1,0 +1,176 @@
+name: Project Automation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/adr/**'
+      - 'docs/planning/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/adr/**'
+      - 'docs/planning/**'
+  issues:
+    types: [ opened, edited, closed ]
+  project_card:
+    types: [ created, moved, converted, deleted ]
+
+jobs:
+  # Update project items when ADRs change
+  adr-tracker:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'docs/adr/') || contains(github.event.pull_request.changed_files, 'docs/adr/')
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Process ADR changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Get changed ADR files
+            const changedFiles = context.payload.push?.changed_files || 
+                               context.payload.pull_request?.changed_files || [];
+            
+            const adrFiles = changedFiles.filter(f => f.startsWith('docs/adr/'));
+            
+            for (const file of adrFiles) {
+              if (file.endsWith('.md')) {
+                const adrContent = fs.readFileSync(file, 'utf8');
+                const adrNumber = file.match(/ADR-(\d+)/)?.[1];
+                const adrTitle = adrContent.match(/^# (.+)$/m)?.[1];
+                
+                if (adrNumber && adrTitle) {
+                  console.log(`Processing ADR-${adrNumber}: ${adrTitle}`);
+                  
+                  // Create or update project item
+                  await github.rest.issues.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title: `ADR-${adrNumber}: ${adrTitle}`,
+                    body: `**ADR Number:** ${adrNumber}\n**File:** ${file}\n**Status:** Updated\n\n${adrContent.slice(0, 500)}...`,
+                    labels: ['adr', 'architecture', `adr-${adrNumber}`]
+                  });
+                }
+              }
+            }
+
+  # Create epic issues from capability map
+  epic-tracker:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md')
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Process capability map
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const capabilityMap = fs.readFileSync('docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md', 'utf8');
+            
+            // Extract epic information
+            const epicMatches = capabilityMap.matchAll(/- (EPIC-[A-C]-\d+) (.+)/g);
+            
+            for (const match of epicMatches) {
+              const [fullMatch, epicId, epicTitle] = match;
+              const team = epicId.match(/EPIC-([A-C])/)?.[1];
+              
+              console.log(`Processing ${epicId}: ${epicTitle}`);
+              
+              // Create or update epic issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `${epicId}: ${epicTitle}`,
+                body: `**Epic ID:** ${epicId}\n**Team:** Team ${team}\n**Status:** Ready for Planning\n\nThis epic is derived from the [Capability Map](docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md).`,
+                labels: ['epic', `team-${team.toLowerCase()}`, epicId.toLowerCase()]
+              });
+            }
+
+  # Wave tracking automation
+  wave-tracker:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md')
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Process delivery waves
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const capabilityMap = fs.readFileSync('docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md', 'utf8');
+            
+            // Extract wave information
+            const waveMatches = capabilityMap.matchAll(/### Wave (\d+) — (.+?)\nOwner: (.+?)\nSupport: (.+?)\n\nIncludes:\n(.+?)\n\nExit criteria:\n(.+?)(?=\n\n###|\n---|$)/gs);
+            
+            for (const match of waveMatches) {
+              const [fullMatch, waveNum, waveTitle, owner, support, includes, exitCriteria] = match;
+              
+              console.log(`Processing Wave ${waveNum}: ${waveTitle}`);
+              
+              // Create or update wave issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Wave ${waveNum}: ${waveTitle}`,
+                body: `**Wave:** ${waveNum}\n**Title:** ${waveTitle}\n**Owner:** ${owner}\n**Support:** ${support}\n\n**Includes:**\n${includes.trim()}\n\n**Exit Criteria:**\n${exitCriteria.trim()}\n\nThis wave is defined in the [Capability Map](docs/planning/CAPABILITY_MAP_AND_EPIC_BREAKDOWN.md).`,
+                labels: ['wave', `wave-${waveNum}`, 'delivery']
+              });
+            }
+
+  # Team board synchronization
+  team-sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.event.head_commit.modified, 'docs/')
+    permissions:
+      issues: write
+    steps:
+      - name: Sync team boards
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Define team mappings
+            const teams = {
+              'team-a-community-core': ['Identity and Access', 'Community Structure', 'Memberships and Access Groups'],
+              'team-b-experience': ['Discussions and Feed', 'Events', 'Resources and Documents', 'Realtime UX'],
+              'team-c-ops-monetization': ['Commerce and Billing', 'Notifications and Email', 'Automation and Jobs', 'Admin Reporting']
+            };
+            
+            // Get all open issues with team labels
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['epic']
+            });
+            
+            // Organize issues by team
+            for (const issue of issues.data) {
+              const teamLabel = issue.labels.find(l => l.name.startsWith('team-'));
+              if (teamLabel) {
+                console.log(`Issue ${issue.number} belongs to ${teamLabel.name}`);
+                // Add to appropriate project board (would need project ID)
+              }
+            }
