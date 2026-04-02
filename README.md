@@ -4,7 +4,7 @@ A community software platform for operating structured online communities.
 
 ## Overview
 
-FoundryRooms v1 is a **community platform** for creators, educators, and membership businesses. It provides member identity and access control, spaces and channels, discussions, events, resources, memberships, notifications, and basic automation.
+FoundryRooms is a **community platform** for creators, educators, and membership businesses. It provides member identity and access control, spaces and channels, discussions, events, resources, memberships, notifications, and basic automation.
 
 **This is not** a multiplayer coding room or developer sandbox - those features are planned for future phases.
 
