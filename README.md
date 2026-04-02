@@ -12,16 +12,17 @@ FoundryRooms v1 is a **community platform** for creators, educators, and members
 
 ```
 FoundryRooms/
-├── frontend/                # Frontend application
-├── backend/                 # Backend modular monolith
-├── worker/                  # Async jobs and webhooks
-├── contracts/               # Shared API contracts and fixtures
-├── tests/                   # Architecture, contract, integration, e2e tests
-├── docs/                    # Specs, governance, and ADRs
-└── scripts/                 # Development and deployment scripts
+├── apps/
+│   ├── frontend/         # Frontend application (feature-based)
+│   ├── backend/          # Backend modular monolith (DDD + hexagonal)
+│   └── worker/           # Async jobs and webhooks
+├── contracts/            # Shared API contracts and fixtures
+├── tests/                # Architecture, contract, integration, e2e tests
+├── docs/                 # Specs, governance, and ADRs
+└── scripts/              # Development and deployment scripts
 ```
 
-Each backend bounded context follows hexagonal architecture with `domain/`, `application/`, `adapters/`, and `contracts/` layers.
+Backend bounded contexts are under `apps/backend/src/` with full hexagonal architecture (domain/application/adapters/contracts/tests). Frontend uses feature-based structure with components, layouts, and services.
 
 ## Architecture
 

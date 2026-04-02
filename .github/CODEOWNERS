@@ -32,8 +32,8 @@
 # Team A — Community Core
 # Identity & Access + Community Structure
 # -----------------------------
-/backend/identity-access/                    @team-a-community-core @governor
-/backend/community-structure/                @team-a-community-core @governor
+/apps/backend/src/identity-access/           @team-a-community-core @governor
+/apps/backend/src/community-structure/       @team-a-community-core @governor
 /contracts/api/identity-access/              @team-a-community-core @governor
 /contracts/api/community-structure/          @team-a-community-core @governor
 /contracts/events/identity-access/           @team-a-community-core @governor
@@ -47,9 +47,9 @@
 # Team B — Experience
 # Engagement + Resources + member-facing frontend surfaces
 # -----------------------------
-/backend/engagement/                         @team-b-experience @governor
-/backend/resources/                          @team-b-experience @governor
-/frontend/                                   @team-b-experience @governor
+/apps/backend/src/engagement/                @team-b-experience @governor
+/apps/backend/src/resources/                 @team-b-experience @governor
+/apps/frontend/                              @team-b-experience @governor
 /contracts/api/engagement/                   @team-b-experience @governor
 /contracts/api/resources/                    @team-b-experience @governor
 /contracts/events/engagement/                @team-b-experience @governor
@@ -63,11 +63,11 @@
 # Team C — Ops & Monetization
 # Events + Commerce + Automation + Admin foundations + worker surfaces
 # -----------------------------
-/backend/events/                             @team-c-ops-monetization @governor
-/backend/commerce/                           @team-c-ops-monetization @governor
-/backend/automation/                         @team-c-ops-monetization @governor
-/backend/admin-reporting/                    @team-c-ops-monetization @governor
-/worker/                                     @team-c-ops-monetization @governor
+/apps/backend/src/events/                    @team-c-ops-monetization @governor
+/apps/backend/src/commerce/                  @team-c-ops-monetization @governor
+/apps/backend/src/automation/                @team-c-ops-monetization @governor
+/apps/backend/src/admin-reporting/           @team-c-ops-monetization @governor
+/apps/worker/                                @team-c-ops-monetization @governor
 /contracts/api/events/                       @team-c-ops-monetization @governor
 /contracts/api/commerce/                     @team-c-ops-monetization @governor
 /contracts/api/automation/                   @team-c-ops-monetization @governor
@@ -100,6 +100,6 @@
 # -----------------------------
 # Shared backend composition surfaces
 # -----------------------------
-/backend/bootstrap/                          @governor @architecture
-/backend/shared/                             @governor @architecture
-/backend/notifications/                      @governor @architecture
+/apps/backend/src/bootstrap/                @governor @architecture
+/apps/backend/src/shared/                   @governor @architecture
+/apps/backend/src/notifications/            @governor @architecture

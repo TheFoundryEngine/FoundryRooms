@@ -51,10 +51,11 @@ This means the repo structure should be **technology-neutral where possible**, b
 │   └── adr/
 │       ├── global/
 │       └── features/
-├── frontend/                    # frontend application area
-├── backend/                     # backend modular monolith
-├── worker/                      # optional async processing surface
-├── contracts/                   # shared contracts, fixtures, mocks
+├── apps/
+│   ├── frontend/        # frontend application area
+│   ├── backend/         # backend modular monolith
+│   └── worker/          # optional async processing surface
+├── contracts/           # shared contracts, fixtures, mocks
 │   ├── api/
 │   ├── events/
 │   ├── fixtures/
