@@ -1,0 +1,32 @@
+# CODEOWNERS for FoundryRooms
+#
+# This file defines ownership for the bounded contexts as described in
+# docs/governance/DEVELOPMENT_GOVERNANCE.md and ADR-002
+
+# Global ownership
+*       @governor
+
+# Team A - Community Core
+/src/identity-access/      @team-a-community-core
+/src/community-structure/  @team-a-community-core
+
+# Team B - Experience Layer  
+/src/engagement/           @team-b-experience
+/src/resources/            @team-b-experience
+
+# Team C - Operations & Monetization
+/src/events/               @team-c-ops-monetization
+/src/commerce/             @team-c-ops-monetization
+/src/automation/           @team-c-ops-monetization
+/src/admin-reporting/      @team-c-ops-monetization
+
+# Cross-cutting concerns
+/contracts/                @governor
+/tests/                    @governor
+/docs/                      @governor
+/tools/                     @governor
+.github/                   @governor
+
+# Emergency overrides
+# In case of urgent security fixes, the maintainers group can step in
+*       @maintainers
