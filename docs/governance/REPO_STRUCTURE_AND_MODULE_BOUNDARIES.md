@@ -40,30 +40,21 @@ This means the repo structure should be **technology-neutral where possible**, b
 /
 ├── .github/
 │   ├── agents/
+│   ├── instructions/
 │   ├── workflows/
 │   ├── CODEOWNERS
 │   └── pull_request_template.md
+├── AGENTS.md
 ├── docs/
-│   ├── adr/
-│   │   ├── global/
-│   │   └── features/
+│   ├── spec/
 │   ├── governance/
-│   └── spec/
-├── apps/
-│   ├── web/                # frontend application
-│   ├── api/                # backend modular monolith entrypoint
-│   └── worker/             # async jobs, webhooks, notifications (if separated logically)
-├── modules/
-│   ├── identity-access/
-│   ├── community-structure/
-│   ├── engagement/
-│   ├── resources/
-│   ├── events/
-│   ├── commerce/
-│   ├── notifications/
-│   ├── automation/
-│   └── admin-reporting/
-├── contracts/
+│   └── adr/
+│       ├── global/
+│       └── features/
+├── frontend/                    # frontend application area
+├── backend/                     # backend modular monolith
+├── worker/                      # optional async processing surface
+├── contracts/                   # shared contracts, fixtures, mocks
 │   ├── api/
 │   ├── events/
 │   ├── fixtures/
@@ -74,7 +65,7 @@ This means the repo structure should be **technology-neutral where possible**, b
 │   ├── integration/
 │   └── e2e/
 ├── scripts/
-└── AGENTS.md
+└── tools/
 ```
 
 ---

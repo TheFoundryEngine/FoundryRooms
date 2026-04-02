@@ -1,37 +1,105 @@
-# CODEOWNERS for FoundryRooms
+# FoundryRooms CODEOWNERS (template)
 #
-# This file defines ownership for the bounded contexts as described in
-# docs/governance/DEVELOPMENT_GOVERNANCE.md and ADR-002
+# Replace @YOUR-ORG/... with your actual GitHub organization teams.
+# Every referenced team must be visible and have write access to the repository.
+# GitHub uses the CODEOWNERS file from the base branch of the pull request.
+# Keep paths case-correct.
 
-# Global ownership
-*       @governor
+# -----------------------------
+# Default ownership
+# -----------------------------
+*                                           @governor @architecture
 
-# Team A - Community Core
-/modules/identity-access/      @team-a-community-core
-/modules/community-structure/  @team-a-community-core
+# -----------------------------
+# Source of truth docs
+# -----------------------------
+/AGENTS.md                                   @governor @architecture
+/docs/spec/                                  @governor @architecture
+/docs/governance/                            @governor @architecture
+/docs/adr/global/                            @governor @architecture
+/docs/adr/features/                          @governor
 
-# Team B - Experience Layer  
-/modules/engagement/           @team-b-experience
-/modules/resources/            @team-b-experience
-/apps/web/                     @team-b-experience
+# -----------------------------
+# GitHub agent / workflow adapter files
+# -----------------------------
+/.github/agents/                             @governor @architecture
+/.github/instructions/                       @governor @architecture
+/.github/workflows/                          @governor @platform
+/.github/CODEOWNERS                          @governor @architecture
+/.github/pull_request_template.md            @governor @architecture
 
-# Team C - Operations & Monetization
-/modules/events/               @team-c-ops-monetization
-/modules/commerce/             @team-c-ops-monetization
-/modules/automation/           @team-c-ops-monetization
-/modules/admin-reporting/      @team-c-ops-monetization
-/apps/worker/                  @team-c-ops-monetization
+# -----------------------------
+# Team A — Community Core
+# Identity & Access + Community Structure
+# -----------------------------
+/backend/identity-access/                    @team-a-community-core @governor
+/backend/community-structure/                @team-a-community-core @governor
+/contracts/api/identity-access/              @team-a-community-core @governor
+/contracts/api/community-structure/          @team-a-community-core @governor
+/contracts/events/identity-access/           @team-a-community-core @governor
+/contracts/events/community-structure/       @team-a-community-core @governor
+/tests/contract/identity-access/             @team-a-community-core @governor
+/tests/contract/community-structure/         @team-a-community-core @governor
+/tests/integration/identity-access/          @team-a-community-core @governor
+/tests/integration/community-structure/      @team-a-community-core @governor
 
-# Shared application surfaces
-/apps/api/                     @governor
+# -----------------------------
+# Team B — Experience
+# Engagement + Resources + member-facing frontend surfaces
+# -----------------------------
+/backend/engagement/                         @team-b-experience @governor
+/backend/resources/                          @team-b-experience @governor
+/frontend/                                   @team-b-experience @governor
+/contracts/api/engagement/                   @team-b-experience @governor
+/contracts/api/resources/                    @team-b-experience @governor
+/contracts/events/engagement/                @team-b-experience @governor
+/contracts/events/resources/                 @team-b-experience @governor
+/tests/contract/engagement/                  @team-b-experience @governor
+/tests/contract/resources/                   @team-b-experience @governor
+/tests/integration/engagement/               @team-b-experience @governor
+/tests/integration/resources/                @team-b-experience @governor
 
-# Cross-cutting concerns
-/contracts/                @governor
-/tests/                    @governor
-/docs/                      @governor
-/tools/                     @governor
-.github/                   @governor
+# -----------------------------
+# Team C — Ops & Monetization
+# Events + Commerce + Automation + Admin foundations + worker surfaces
+# -----------------------------
+/backend/events/                             @team-c-ops-monetization @governor
+/backend/commerce/                           @team-c-ops-monetization @governor
+/backend/automation/                         @team-c-ops-monetization @governor
+/backend/admin-reporting/                    @team-c-ops-monetization @governor
+/worker/                                     @team-c-ops-monetization @governor
+/contracts/api/events/                       @team-c-ops-monetization @governor
+/contracts/api/commerce/                     @team-c-ops-monetization @governor
+/contracts/api/automation/                   @team-c-ops-monetization @governor
+/contracts/api/admin-reporting/              @team-c-ops-monetization @governor
+/contracts/events/events/                    @team-c-ops-monetization @governor
+/contracts/events/commerce/                  @team-c-ops-monetization @governor
+/contracts/events/automation/                @team-c-ops-monetization @governor
+/contracts/events/admin-reporting/           @team-c-ops-monetization @governor
+/tests/contract/events/                      @team-c-ops-monetization @governor
+/tests/contract/commerce/                    @team-c-ops-monetization @governor
+/tests/contract/automation/                  @team-c-ops-monetization @governor
+/tests/contract/admin-reporting/             @team-c-ops-monetization @governor
+/tests/integration/events/                   @team-c-ops-monetization @governor
+/tests/integration/commerce/                 @team-c-ops-monetization @governor
+/tests/integration/automation/               @team-c-ops-monetization @governor
+/tests/integration/admin-reporting/          @team-c-ops-monetization @governor
 
-# Emergency overrides
-# In case of urgent security fixes, the maintainers group can step in
-*       @maintainers
+# -----------------------------
+# Shared contracts and architecture safety nets
+# -----------------------------
+/contracts/fixtures/                         @governor @architecture
+/contracts/mocks/                            @governor @architecture
+/tests/architecture/                         @governor @architecture
+/tests/e2e/                                  @governor @platform
+/db/migrations/                              @governor @architecture
+/db/schema/                                  @governor @architecture
+/scripts/                                    @governor @platform
+/tools/                                      @governor @platform
+
+# -----------------------------
+# Shared backend composition surfaces
+# -----------------------------
+/backend/bootstrap/                          @governor @architecture
+/backend/shared/                             @governor @architecture
+/backend/notifications/                      @governor @architecture
