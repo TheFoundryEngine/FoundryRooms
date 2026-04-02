@@ -8,6 +8,32 @@ FoundryRooms v1 is a **community platform** for creators, educators, and members
 
 **This is not** a multiplayer coding room or developer sandbox - those features are planned for future phases.
 
+## Repository Structure
+
+```
+FoundryRooms/
+├── apps/
+│   ├── web/                # Frontend application
+│   ├── api/                # Backend modular monolith entrypoint
+│   └── worker/             # Async jobs and webhooks
+├── modules/                # Backend bounded contexts
+│   ├── identity-access/
+│   ├── community-structure/
+│   ├── engagement/
+│   ├── resources/
+│   ├── events/
+│   ├── commerce/
+│   ├── notifications/
+│   ├── automation/
+│   └── admin-reporting/
+├── contracts/              # Shared API contracts and fixtures
+├── tests/                  # Architecture, contract, integration, e2e tests
+├── docs/                   # Specs, governance, and ADRs
+└── scripts/                # Development and deployment scripts
+```
+
+Each module follows hexagonal architecture with `domain/`, `application/`, `adapters/`, and `contracts/` layers.
+
 ## Architecture
 
 FoundryRooms is built as a **modular monolith** with:

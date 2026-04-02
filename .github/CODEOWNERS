@@ -7,18 +7,23 @@
 *       @governor
 
 # Team A - Community Core
-/src/identity-access/      @team-a-community-core
-/src/community-structure/  @team-a-community-core
+/modules/identity-access/      @team-a-community-core
+/modules/community-structure/  @team-a-community-core
 
 # Team B - Experience Layer  
-/src/engagement/           @team-b-experience
-/src/resources/            @team-b-experience
+/modules/engagement/           @team-b-experience
+/modules/resources/            @team-b-experience
+/apps/web/                     @team-b-experience
 
 # Team C - Operations & Monetization
-/src/events/               @team-c-ops-monetization
-/src/commerce/             @team-c-ops-monetization
-/src/automation/           @team-c-ops-monetization
-/src/admin-reporting/      @team-c-ops-monetization
+/modules/events/               @team-c-ops-monetization
+/modules/commerce/             @team-c-ops-monetization
+/modules/automation/           @team-c-ops-monetization
+/modules/admin-reporting/      @team-c-ops-monetization
+/apps/worker/                  @team-c-ops-monetization
+
+# Shared application surfaces
+/apps/api/                     @governor
 
 # Cross-cutting concerns
 /contracts/                @governor

@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  changed-areas:
+    name: changed-areas
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.filter.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docs_only:
+              - 'docs/**'
+              - '*.md'
+              - '.github/**'
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder lint step
+        run: |
+          echo "Replace with stack-specific lint commands once ADRs lock the toolchain."
+          echo "Examples later: pnpm lint / nx lint / gradle ktlintCheck / ruff check / etc."
+
+  unit-tests:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder unit test step
+        run: |
+          echo "Replace with stack-specific unit test commands once ADRs are finalized."
+          echo "This job name should remain stable because it is intended to be a required status check."
+
+  integration-tests:
+    name: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder integration test step
+        run: |
+          echo "Replace with service or application integration tests."
+          echo "Include database-backed tests and adapter integration tests once stack is chosen."
+
+  contract-tests:
+    name: contract-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder contract test step
+        run: |
+          echo "Replace with API/event contract validation and consumer/provider tests."
+          echo "This should validate shared fixtures and mock data compatibility."
+
+  architecture-tests:
+    name: architecture-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder architecture test step
+        run: |
+          echo "Replace with dependency and boundary tests."
+          echo "Examples later: dep-cruiser / ArchUnit / custom import guards / module boundary tests."
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - unit-tests
+      - integration-tests
+      - contract-tests
+      - architecture-tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder build step
+        run: |
+          echo "Replace with application build steps once frontend/backend stack is selected."
+
+  docs-validation:
+    name: docs-validation
+    runs-on: ubuntu-latest
+    needs: changed-areas
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate docs and governance paths exist
+        run: |
+          test -f docs/spec/HIGH_LEVEL_SPEC.md
+          test -f docs/governance/DEVELOPMENT_GOVERNANCE.md
+          test -f AGENTS.md
+          echo "Core repo governance documents are present."
