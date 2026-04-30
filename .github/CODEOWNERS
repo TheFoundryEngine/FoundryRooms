@@ -1,105 +1,108 @@
 # FoundryRooms CODEOWNERS (template)
 #
-# Replace @YOUR-ORG/... with your actual GitHub organization teams.
-# Every referenced team must be visible and have write access to the repository.
+# Governor / Architect:        @TheFoundryEngine (Bryan)
+# Team A — Community Core:     @NickFlach (Nick)
+# Team C — Ops & Monetization: @EckmanTechLLC (Matt)
+# Team B — Experience:         TBD (unassigned — see Issue tracker)
+#
 # GitHub uses the CODEOWNERS file from the base branch of the pull request.
 # Keep paths case-correct.
 
 # -----------------------------
 # Default ownership
 # -----------------------------
-*                                           @governor @architecture
+*                                           @TheFoundryEngine
 
 # -----------------------------
 # Source of truth docs
 # -----------------------------
-/AGENTS.md                                   @governor @architecture
-/docs/spec/                                  @governor @architecture
-/docs/governance/                            @governor @architecture
-/docs/adr/global/                            @governor @architecture
-/docs/adr/features/                          @governor
+/AGENTS.md                                   @TheFoundryEngine
+/docs/spec/                                  @TheFoundryEngine
+/docs/governance/                            @TheFoundryEngine
+/docs/adr/global/                            @TheFoundryEngine
+/docs/adr/features/                          @TheFoundryEngine
 
 # -----------------------------
 # GitHub agent / workflow adapter files
 # -----------------------------
-/.github/agents/                             @governor @architecture
-/.github/instructions/                       @governor @architecture
-/.github/workflows/                          @governor @platform
-/.github/CODEOWNERS                          @governor @architecture
-/.github/pull_request_template.md            @governor @architecture
+/.github/agents/                             @TheFoundryEngine
+/.github/instructions/                       @TheFoundryEngine
+/.github/workflows/                          @TheFoundryEngine
+/.github/CODEOWNERS                          @TheFoundryEngine
+/.github/pull_request_template.md            @TheFoundryEngine
 
 # -----------------------------
 # Team A — Community Core
 # Identity & Access + Community Structure
 # -----------------------------
-/apps/backend/src/identity-access/           @team-a-community-core @governor
-/apps/backend/src/community-structure/       @team-a-community-core @governor
-/contracts/api/identity-access/              @team-a-community-core @governor
-/contracts/api/community-structure/          @team-a-community-core @governor
-/contracts/events/identity-access/           @team-a-community-core @governor
-/contracts/events/community-structure/       @team-a-community-core @governor
-/tests/contract/identity-access/             @team-a-community-core @governor
-/tests/contract/community-structure/         @team-a-community-core @governor
-/tests/integration/identity-access/          @team-a-community-core @governor
-/tests/integration/community-structure/      @team-a-community-core @governor
+/apps/backend/src/identity-access/           @NickFlach @TheFoundryEngine
+/apps/backend/src/community-structure/       @NickFlach @TheFoundryEngine
+/contracts/api/identity-access/              @NickFlach @TheFoundryEngine
+/contracts/api/community-structure/          @NickFlach @TheFoundryEngine
+/contracts/events/identity-access/           @NickFlach @TheFoundryEngine
+/contracts/events/community-structure/       @NickFlach @TheFoundryEngine
+/tests/contract/identity-access/             @NickFlach @TheFoundryEngine
+/tests/contract/community-structure/         @NickFlach @TheFoundryEngine
+/tests/integration/identity-access/          @NickFlach @TheFoundryEngine
+/tests/integration/community-structure/      @NickFlach @TheFoundryEngine
 
 # -----------------------------
 # Team B — Experience
 # Engagement + Resources + member-facing frontend surfaces
 # -----------------------------
-/apps/backend/src/engagement/                @team-b-experience @governor
-/apps/backend/src/resources/                 @team-b-experience @governor
-/apps/frontend/                              @team-b-experience @governor
-/contracts/api/engagement/                   @team-b-experience @governor
-/contracts/api/resources/                    @team-b-experience @governor
-/contracts/events/engagement/                @team-b-experience @governor
-/contracts/events/resources/                 @team-b-experience @governor
-/tests/contract/engagement/                  @team-b-experience @governor
-/tests/contract/resources/                   @team-b-experience @governor
-/tests/integration/engagement/               @team-b-experience @governor
-/tests/integration/resources/                @team-b-experience @governor
+/apps/backend/src/engagement/                @TheFoundryEngine
+/apps/backend/src/resources/                 @TheFoundryEngine
+/apps/frontend/                              @TheFoundryEngine
+/contracts/api/engagement/                   @TheFoundryEngine
+/contracts/api/resources/                    @TheFoundryEngine
+/contracts/events/engagement/                @TheFoundryEngine
+/contracts/events/resources/                 @TheFoundryEngine
+/tests/contract/engagement/                  @TheFoundryEngine
+/tests/contract/resources/                   @TheFoundryEngine
+/tests/integration/engagement/               @TheFoundryEngine
+/tests/integration/resources/                @TheFoundryEngine
 
 # -----------------------------
 # Team C — Ops & Monetization
 # Events + Commerce + Automation + Admin foundations + worker surfaces
 # -----------------------------
-/apps/backend/src/events/                    @team-c-ops-monetization @governor
-/apps/backend/src/commerce/                  @team-c-ops-monetization @governor
-/apps/backend/src/automation/                @team-c-ops-monetization @governor
-/apps/backend/src/admin-reporting/           @team-c-ops-monetization @governor
-/apps/worker/                                @team-c-ops-monetization @governor
-/contracts/api/events/                       @team-c-ops-monetization @governor
-/contracts/api/commerce/                     @team-c-ops-monetization @governor
-/contracts/api/automation/                   @team-c-ops-monetization @governor
-/contracts/api/admin-reporting/              @team-c-ops-monetization @governor
-/contracts/events/events/                    @team-c-ops-monetization @governor
-/contracts/events/commerce/                  @team-c-ops-monetization @governor
-/contracts/events/automation/                @team-c-ops-monetization @governor
-/contracts/events/admin-reporting/           @team-c-ops-monetization @governor
-/tests/contract/events/                      @team-c-ops-monetization @governor
-/tests/contract/commerce/                    @team-c-ops-monetization @governor
-/tests/contract/automation/                  @team-c-ops-monetization @governor
-/tests/contract/admin-reporting/             @team-c-ops-monetization @governor
-/tests/integration/events/                   @team-c-ops-monetization @governor
-/tests/integration/commerce/                 @team-c-ops-monetization @governor
-/tests/integration/automation/               @team-c-ops-monetization @governor
-/tests/integration/admin-reporting/          @team-c-ops-monetization @governor
+/apps/backend/src/events/                    @EckmanTechLLC @TheFoundryEngine
+/apps/backend/src/commerce/                  @EckmanTechLLC @TheFoundryEngine
+/apps/backend/src/automation/                @EckmanTechLLC @TheFoundryEngine
+/apps/backend/src/admin-reporting/           @EckmanTechLLC @TheFoundryEngine
+/apps/worker/                                @EckmanTechLLC @TheFoundryEngine
+/contracts/api/events/                       @EckmanTechLLC @TheFoundryEngine
+/contracts/api/commerce/                     @EckmanTechLLC @TheFoundryEngine
+/contracts/api/automation/                   @EckmanTechLLC @TheFoundryEngine
+/contracts/api/admin-reporting/              @EckmanTechLLC @TheFoundryEngine
+/contracts/events/events/                    @EckmanTechLLC @TheFoundryEngine
+/contracts/events/commerce/                  @EckmanTechLLC @TheFoundryEngine
+/contracts/events/automation/                @EckmanTechLLC @TheFoundryEngine
+/contracts/events/admin-reporting/           @EckmanTechLLC @TheFoundryEngine
+/tests/contract/events/                      @EckmanTechLLC @TheFoundryEngine
+/tests/contract/commerce/                    @EckmanTechLLC @TheFoundryEngine
+/tests/contract/automation/                  @EckmanTechLLC @TheFoundryEngine
+/tests/contract/admin-reporting/             @EckmanTechLLC @TheFoundryEngine
+/tests/integration/events/                   @EckmanTechLLC @TheFoundryEngine
+/tests/integration/commerce/                 @EckmanTechLLC @TheFoundryEngine
+/tests/integration/automation/               @EckmanTechLLC @TheFoundryEngine
+/tests/integration/admin-reporting/          @EckmanTechLLC @TheFoundryEngine
 
 # -----------------------------
 # Shared contracts and architecture safety nets
 # -----------------------------
-/contracts/fixtures/                         @governor @architecture
-/contracts/mocks/                            @governor @architecture
-/tests/architecture/                         @governor @architecture
-/tests/e2e/                                  @governor @platform
-/db/migrations/                              @governor @architecture
-/db/schema/                                  @governor @architecture
-/scripts/                                    @governor @platform
-/tools/                                      @governor @platform
+/contracts/fixtures/                         @TheFoundryEngine
+/contracts/mocks/                            @TheFoundryEngine
+/tests/architecture/                         @TheFoundryEngine
+/tests/e2e/                                  @TheFoundryEngine
+/db/migrations/                              @TheFoundryEngine
+/db/schema/                                  @TheFoundryEngine
+/scripts/                                    @TheFoundryEngine
+/tools/                                      @TheFoundryEngine
 
 # -----------------------------
 # Shared backend composition surfaces
 # -----------------------------
-/apps/backend/src/bootstrap/                @governor @architecture
-/apps/backend/src/shared/                   @governor @architecture
-/apps/backend/src/notifications/            @governor @architecture
+/apps/backend/src/bootstrap/                @TheFoundryEngine
+/apps/backend/src/shared/                   @TheFoundryEngine
+/apps/backend/src/notifications/            @TheFoundryEngine

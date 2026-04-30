@@ -1,0 +1,100 @@
+name: Auto Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: [CI, Governor Agent Review]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: auto-merge
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+
+    steps:
+      - name: Check all required status checks
+        uses: actions/github-script@v7
+        id: checks
+        with:
+          script: |
+            const pr = context.payload.pull_request ||
+              (await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.number || context.payload.workflow_run?.pull_requests?.[0]?.number
+              })).data;
+
+            if (!pr) {
+              console.log('No PR found, skipping.');
+              return false;
+            }
+
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha,
+            });
+
+            const required = ['lint', 'unit-tests', 'integration-tests', 'contract-tests', 'architecture-tests', 'build', 'governor-review'];
+            const results = checks.check_runs.reduce((acc, run) => {
+              acc[run.name] = { status: run.status, conclusion: run.conclusion };
+              return acc;
+            }, {});
+
+            console.log('Check results:', JSON.stringify(results, null, 2));
+
+            const allPassed = required.every(name => {
+              const check = results[name];
+              return check && check.status === 'completed' && check.conclusion === 'success';
+            });
+
+            console.log('All required checks passed:', allPassed);
+            return allPassed;
+
+      - name: Check PR has at least one approval
+        uses: actions/github-script@v7
+        id: approval
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return false;
+
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            const approved = reviews.some(r => r.state === 'APPROVED');
+            console.log('PR has approval:', approved);
+            return approved;
+
+      - name: Enable auto-merge
+        if: steps.checks.outputs.result == 'true' && steps.approval.outputs.result == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+              commit_title: pr.title,
+              commit_message: `Auto-merged PR #${pr.number} after all checks passed and approval received.\n\n${pr.body || ''}`
+            });
+
+            console.log(`PR #${pr.number} auto-merged successfully.`);
