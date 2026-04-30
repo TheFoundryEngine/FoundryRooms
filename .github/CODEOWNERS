@@ -3,7 +3,7 @@
 # Governor / Architect:        @TheFoundryEngine (Bryan)
 # Team A — Community Core:     @NickFlach (Nick)
 # Team C — Ops & Monetization: @EckmanTechLLC (Matt)
-# Team B — Experience:         TBD (unassigned — see Issue tracker)
+# Team B — Experience:         @bryanyMac (Bryan)
 #
 # GitHub uses the CODEOWNERS file from the base branch of the pull request.
 # Keep paths case-correct.
@@ -50,17 +50,18 @@
 # Team B — Experience
 # Engagement + Resources + member-facing frontend surfaces
 # -----------------------------
-/apps/backend/src/engagement/                @TheFoundryEngine
-/apps/backend/src/resources/                 @TheFoundryEngine
-/apps/frontend/                              @TheFoundryEngine
-/contracts/api/engagement/                   @TheFoundryEngine
-/contracts/api/resources/                    @TheFoundryEngine
-/contracts/events/engagement/                @TheFoundryEngine
-/contracts/events/resources/                 @TheFoundryEngine
-/tests/contract/engagement/                  @TheFoundryEngine
-/tests/contract/resources/                   @TheFoundryEngine
-/tests/integration/engagement/               @TheFoundryEngine
-/tests/integration/resources/                @TheFoundryEngine
+/apps/backend/src/engagement/                @bryanyMac @TheFoundryEngine
+/apps/backend/src/resources/                 @bryanyMac @TheFoundryEngine
+/apps/frontend/                              @bryanyMac @TheFoundryEngine
+/contracts/api/engagement/                   @bryanyMac @TheFoundryEngine
+/contracts/api/resources/                    @bryanyMac @TheFoundryEngine
+/contracts/events/engagement/                @bryanyMac @TheFoundryEngine
+/contracts/events/resources/                 @bryanyMac @TheFoundryEngine
+/tests/contract/engagement/                  @bryanyMac @TheFoundryEngine
+/tests/contract/resources/                   @bryanyMac @TheFoundryEngine
+/tests/integration/engagement/               @bryanyMac @TheFoundryEngine
+/tests/integration/resources/                @bryanyMac @TheFoundryEngine
+
 
 # -----------------------------
 # Team C — Ops & Monetization

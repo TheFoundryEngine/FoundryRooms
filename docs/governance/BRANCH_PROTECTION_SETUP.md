@@ -103,7 +103,7 @@ Squash merges into main automatically
 | Governor / Architecture / ADRs | Bryan | @TheFoundryEngine |
 | Team A — Community Core (identity, community structure) | Nick | @NickFlach |
 | Team C — Ops & Monetization (events, commerce, worker) | Matt | @EckmanTechLLC |
-| Team B — Experience (frontend, engagement, resources) | TBD | — |
+| Team B — Experience (frontend, engagement, resources) | Bryan | @bryanyMac |
 
 CODEOWNERS enforces that every PR touching a context requires approval from the context owner plus the Governor.
 
