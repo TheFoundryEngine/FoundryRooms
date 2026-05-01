@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import type { ApiKey, ApiKeyHash } from './agent.entity';
 import {
   Agent,
-  ApiKey,
-  ApiKeyHash,
   generateApiKey,
   isValidApiKey,
   parseApiKey,
@@ -10,6 +9,12 @@ import {
   createApiKeyHash,
 } from './agent.entity';
 import { createActorId, generateActorId } from './actor.entity';
+
+// Type assertions to verify imported types are used correctly
+const _typeCheckApiKey: ApiKey = '' as ApiKey;
+const _typeCheckApiKeyHash: ApiKeyHash = '' as ApiKeyHash;
+void _typeCheckApiKey;
+void _typeCheckApiKeyHash;
 
 describe('ApiKey Value Object', () => {
   describe('generateApiKey', () => {

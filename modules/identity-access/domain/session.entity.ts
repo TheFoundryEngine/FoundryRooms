@@ -45,7 +45,8 @@ export function generateSessionId(): SessionId {
 declare const __sessionTokenBrand: unique symbol;
 export type SessionToken = string & { readonly [__sessionTokenBrand]: never };
 
-const SESSION_TOKEN_LENGTH = 43; // 32 bytes in base64url = 43 chars
+/** Expected length of session token: 32 bytes in base64url = 43 chars */
+export const SESSION_TOKEN_LENGTH = 43;
 
 export function generateSessionToken(): SessionToken {
   const bytes = randomBytes(32);

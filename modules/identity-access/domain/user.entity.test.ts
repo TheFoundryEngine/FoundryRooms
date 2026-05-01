@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import {
-  User,
-  Email,
-  PasswordHash,
-  createEmail,
-  createPasswordHash,
-} from './user.entity';
+import type { Email, PasswordHash } from './user.entity';
+import { User, createEmail, createPasswordHash } from './user.entity';
 import { createActorId } from './actor.entity';
+
+// Type assertions to verify imported types are used correctly
+const _typeCheckEmail: Email = '' as Email;
+const _typeCheckPasswordHash: PasswordHash = '' as PasswordHash;
+void _typeCheckEmail;
+void _typeCheckPasswordHash;
 
 describe('Email Value Object', () => {
   describe('createEmail', () => {

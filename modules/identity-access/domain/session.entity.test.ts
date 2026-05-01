@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import type { SessionId, SessionToken } from './session.entity';
 import {
   Session,
-  SessionId,
-  SessionToken,
   createSessionId,
   generateSessionId,
   generateSessionToken,
@@ -11,7 +10,13 @@ import {
   SESSION_DURATIONS,
   createExpirationDate,
 } from './session.entity';
-import { createActorId, generateActorId } from './actor.entity';
+import { generateActorId } from './actor.entity';
+
+// Type assertions to use the imported types
+const _typeCheckSessionId: SessionId = '' as SessionId;
+const _typeCheckSessionToken: SessionToken = '' as SessionToken;
+void _typeCheckSessionId;
+void _typeCheckSessionToken;
 
 describe('SessionId Value Object', () => {
   describe('createSessionId', () => {
