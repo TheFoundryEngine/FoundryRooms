@@ -1,0 +1,26 @@
+{
+  "name": "foundry-rooms",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Community platform with modular monolith architecture",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0",
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "modules/*",
+    "contracts"
+  ]
+}

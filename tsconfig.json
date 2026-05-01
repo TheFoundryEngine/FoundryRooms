@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@foundry/contracts": ["./contracts"],
+      "@foundry/contracts/*": ["./contracts/*"],
+      "@foundry/identity-access": ["./modules/identity-access"],
+      "@foundry/community-structure": ["./modules/community-structure"]
+    }
+  },
+  "include": ["modules/**/*", "contracts/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
