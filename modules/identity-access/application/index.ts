@@ -10,4 +10,11 @@ export type {
   UserRepository,
   AgentRepository,
   SessionRepository,
+  PasswordHasherPort,
+  ApiKeyGeneratorPort,
+  EventEmitterPort,
+  DomainEvent,
 } from './ports';
+
+// Use Cases
+export * from './use-cases';
