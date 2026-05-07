@@ -62,3 +62,8 @@ yarn.lock
 test-results/
 playwright-report/
 test-results.xml
+
+# Per-developer workspace tooling (odin/Claude Code agents, lessons drafts, etc.)
+# Private to each contributor's local workflow; must not be committed.
+.odin/
+.claude/
