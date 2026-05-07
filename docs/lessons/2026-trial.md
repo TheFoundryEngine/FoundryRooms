@@ -114,4 +114,59 @@ Format per entry: **trigger → why it's interesting → open question** (where 
 
 ---
 
+## L10 — Status check SUCCESS does not equal agent verdict
+
+**Date:** 2026-05-07
+**Trigger:** PR #3 (Wave 1 auth core) ran `governor-review` workflow. The CI status check posted SUCCESS. The Governor Agent's actual PR comment said *"Governor Agent review failed -- check workflow logs"* (twice — May 1 and May 4).
+
+**Why it's interesting:** The `governor-review` job marks SUCCESS based on workflow exit code, not on the agent's review content. Auto-merge keys off the structural green, not the semantic verdict. When the agent crashes or times out, the gate misfires green — work passes the AI acceptance check while the AI never actually accepted anything.
+
+**Open question:** Is the right fix to make the agent's verdict the job's exit code, to surface the agent's verdict as a separate gate, or to add a second AI auditor that checks the first AI's review actually completed? Each shape has different failure modes.
+
+---
+
+## L11 — Workflow choice can shift mid-trial; first gate engagement is unpredictable
+
+**Date:** 2026-05-07
+**Trigger:** Nick used direct-push to main for Wave 0 (no AI gate). For Wave 1, he opened a PR (gate-bearing pathway). First time anyone in the trial exercised the AI acceptance gate on real code. The Governor Agent immediately misfired.
+
+**Why it's interesting:** Workflow patterns are not stable across waves. The team's choice of *how* to land work can shift between waves without explicit coordination. When the gate finally got its first real test case, it failed. This means rules-in-docs were untested for 30+ days even though they were nominally active.
+
+**Open question:** Should AI gates be exercised deliberately on synthetic test cases before being trusted to gate real work? Right now the Governor's first real test was a 14k-line PR — exactly the worst case for an agent with a 12k-char diff truncation.
+
+---
+
+## L12 — First explicit cross-team review request
+
+**Date:** 2026-05-07
+**Trigger:** Nick commented on PR #3: *"Matt, please review this. It looks like the Governor Agent review passed the second time around. Maybe you could give it a look to ensure we are in the ballpark before we merge?"* First time in the trial anyone explicitly invoked another human as the acceptance gate. Matt's APPROVED review is the first non-lazy-consensus review event in 30+ days.
+
+**Why it's interesting:** The trial's central question is "control of accept/reject." For 30 days no rejections fired and no explicit acceptances were requested — work landed via lazy consensus. PR #3 broke the pattern: when the AI gate failed, a human gate was explicitly summoned. Suggests: when AI gates are unreliable, humans default to direct human-to-human escalation, bypassing the automated layer entirely.
+
+**Open question:** Does the system stabilize on "AI gate when it works, human gate as escape valve," or does it drift back to lazy consensus once the AI gate becomes reliable enough to be ignored?
+
+---
+
+## L13 — The Governor's top hard rule had a textbook trigger and didn't fire
+
+**Date:** 2026-05-07
+**Trigger:** PR #3 added 7 new schemas to `auth.contract.ts` without updating `contracts/fixtures/` or `contracts/mocks/`. This is the textbook violation `governor.agent.md` lists as its #1 hard rule: *"reject contract changes that do not update fixtures, mocks, and tests."* The agent crashed before evaluating; the rule never bound.
+
+**Why it's interesting:** Written rules don't bind unless they execute. The Governor was specifically configured to reject this exact pattern. The pattern occurred. The rule didn't fire. The work merged anyway (with human approval). First confirmed instance of a clearly-stated AI rule failing to bind in practice on a real test case.
+
+**Open question:** When the AI gate cannot evaluate a PR (crash, timeout, diff truncation), what should happen by default — auto-reject ("fail closed"), auto-pass ("fail open"), or block the PR until a human acks the agent's failure? The current implementation effectively fails open, which is the riskiest default.
+
+---
+
+## L14 — Auto-merge requires `workflow_run`/`pull_request`/`check_suite` events; review events don't trigger it
+
+**Date:** 2026-05-07
+**Trigger:** PR #3 had all CI checks green and an APPROVED human review. Per `auto-merge.yml`'s logic, conditions for auto-merge were met. Auto-merge did not fire. Manual `gh pr merge` was required.
+
+**Why it's interesting:** The auto-merge workflow's `on:` triggers include `workflow_run`, `pull_request`, and `check_suite` — but not pull-request-review events. So a PR that becomes mergeable via the *last* missing condition being a review approval (rather than the last CI check completing) sits open until something else fires. Structural bug in the gate plumbing, not the gate logic. Two of the trial's gates (auto-merge and Governor) have now been observed to misfire on the same PR.
+
+**Open question:** Are the team's automation gates collectively reliable enough to lean on, or is manual intervention the actual workflow? If manual is the actual workflow, the automation is theater — worse than nothing, because it creates the appearance of a gate that isn't gating.
+
+---
+
 *Lessons captured by the foundation session as part of the Odin workflow. Candidates surfaced when (1) a human corrects an agent, (2) an odin-i session reports back with a deviation, or (3) the repo state reveals a governance gap. Approval required from Matt before commit.*
