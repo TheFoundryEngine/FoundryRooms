@@ -17,6 +17,11 @@ export const AggregateType = z.enum([
   'space',
   'channel',
   'membership',
+  'plan',
+  'offer',
+  'subscription',
+  'purchase',
+  'refund',
 ]);
 export type AggregateType = z.infer<typeof AggregateType>;
 

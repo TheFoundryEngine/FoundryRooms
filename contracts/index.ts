@@ -10,3 +10,7 @@ export * as IdentityAccessFixtures from './fixtures/identity-access';
 export * as CommunityStructureFixtures from './fixtures/community-structure';
 // Mocks
 export * as IdentityAccessMocks from './mocks/identity-access';
+// Commerce
+export * as CommerceApi from './api/commerce';
+export * as CommerceEvents from './events/commerce';
+export * as CommerceFixtures from './fixtures/commerce';
