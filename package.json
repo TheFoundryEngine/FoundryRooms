@@ -8,7 +8,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:worker": "tsc -p worker/tsconfig.json && node worker/dist/index.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -25,7 +26,8 @@
   },
   "workspaces": [
     "modules/*",
-    "contracts"
+    "contracts",
+    "worker"
   ],
   "dependencies": {
     "@nestjs/common": "^11.1.19",
