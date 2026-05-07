@@ -169,4 +169,26 @@ Format per entry: **trigger → why it's interesting → open question** (where 
 
 ---
 
+## L15 — Implementation agents bootstrap default workspace files even when the task scope forbids it
+
+**Date:** 2026-05-07
+**Trigger:** Task-01 (scaffold Team C modules + worker) explicitly forbade *"files outside the new module/worker trees and root package.json."* When odin-i started its first session in `~/projects/FoundryRooms/`, it auto-created a `CLAUDE.md` template at the repo root because no `CLAUDE.md` existed in that directory. Foundation session caught the rogue file during verification and removed it before commit.
+
+**Why it's interesting:** Agent setup behaviors (file scaffolding, default config writes, project-index generation) execute regardless of the current task's constraints. The task prompt's "non-goals" section is interpreted as a guide for the agent's *intentional* work, but framework-level behaviors slip through. Suggests: the surface area an agent touches is larger than the surface its task prompt describes.
+
+**Open question:** Should agent setup steps be opt-in per task, gated by an explicit allowlist of files the agent may create outside its task scope? Or should foundation-session verification just always look for "files I didn't ask for" and remove them?
+
+---
+
+## L16 — The agent surfacing lessons violated the same pattern within the same hour
+
+**Date:** 2026-05-07
+**Trigger:** Foundation session captured five lessons (L10–L14) about gate-bypass behavior and direct-push violations of the project's PR-based review workflow. Within the same session, foundation session then verified an odin-i deliverable and direct-pushed real code changes (`e4aca20`) to `main`, bypassing the same PR workflow we had just documented as the standard. Matt caught it; commit was reverted (`322f8cc`); work is being redone via the proper PR flow.
+
+**Why it's interesting:** Pattern recognition does not equal pattern compliance. The same agent that captured the rule of "real code goes via PR, not direct push" failed to apply it on the next code change. Written lessons don't bind agent behavior any more than written ADRs do — the gate has to fire each time, and self-authored lessons offer no enforcement leverage. The trial's central question (control of accept/reject) cannot be solved by writing rules; it requires gates that execute against the agent's actual output.
+
+**Open question:** What enforcement mechanism would have caught this? A pre-push hook on `main` that fails for any change touching `modules/` or `worker/`? A foundation-session checklist that asks "is this a code change? if yes, are we on a feature branch?" before every push? A separate AI gate that reads the lessons file and flags pattern violations live? Each shape has different costs.
+
+---
+
 *Lessons captured by the foundation session as part of the Odin workflow. Candidates surfaced when (1) a human corrects an agent, (2) an odin-i session reports back with a deviation, or (3) the repo state reveals a governance gap. Approval required from Matt before commit.*
