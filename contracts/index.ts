@@ -14,3 +14,6 @@ export * as IdentityAccessMocks from './mocks/identity-access';
 export * as CommerceApi from './api/commerce';
 export * as CommerceEvents from './events/commerce';
 export * as CommerceFixtures from './fixtures/commerce';
+export * as EventsApi from './api/events';
+export * as EventsEvents from './events/events';
+export * as EventsFixtures from './fixtures/events';
