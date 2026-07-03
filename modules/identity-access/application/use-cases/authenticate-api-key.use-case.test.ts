@@ -54,7 +54,7 @@ function createTestAgent(apiKey: ApiKey, overrides?: Partial<{
     isActive: overrides?.isActive ?? true,
     apiKeyHash,
     ownerActorId: null,
-    description: overrides && 'description' in overrides ? overrides.description : 'A test agent',
+    description: overrides && 'description' in overrides ? overrides.description ?? null : 'A test agent',
     metadata: { env: 'test' },
   });
 }

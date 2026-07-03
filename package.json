@@ -5,6 +5,8 @@
   "description": "Community platform with modular monolith architecture",
   "scripts": {
     "build": "tsc --build",
+    "start": "node dist/src/main.js",
+    "start:dev": "ts-node src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts",
@@ -31,9 +33,12 @@
   ],
   "dependencies": {
     "@nestjs/common": "^11.1.19",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.19",
     "@nestjs/platform-express": "^11.1.19",
+    "@types/cookie-parser": "^1.4.10",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "drizzle-orm": "^0.45.2",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",

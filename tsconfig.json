@@ -9,6 +9,6 @@
       "@foundry/community-structure": ["./modules/community-structure"]
     }
   },
-  "include": ["modules/**/*", "contracts/**/*", "tests/**/*"],
+  "include": ["src/**/*", "modules/**/*", "contracts/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }
