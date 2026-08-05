@@ -45,9 +45,11 @@ jobs:
       - name: Post Governor review as PR comment
         if: always()
         uses: actions/github-script@v7
+        env:
+          REVIEW_TEXT: ${{ steps.governor.outputs.review }}
         with:
           script: |
-            const review = `## Governor Agent Review\n\n${{ steps.governor.outputs.review }}`;
+            const review = `## Governor Agent Review\n\n${process.env.REVIEW_TEXT}`;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
