@@ -3,6 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-04-02
 - **Owners:** Architecture lead, Governor Agent, Team A lead
+- **Related:** ADR-002, ADR-003
 
 ## Context
 

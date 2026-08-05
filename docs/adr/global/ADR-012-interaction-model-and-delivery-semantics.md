@@ -1,9 +1,9 @@
 # ADR-012: Interaction Model and Delivery Semantics
 
-**Status:** Proposed  
-**Date:** 2026-04-02  
-**Owners:** Governor Agent / Project Architecture Group  
-**Related:** ADR-001, ADR-002, ADR-004, ADR-006, ADR-007, ADR-008, ADR-010, ADR-011
+- **Status:** Accepted
+- **Date:** 2026-04-02
+- **Owners:** Governor Agent / Project Architecture Group
+- **Related:** ADR-001, ADR-002, ADR-004, ADR-006, ADR-007, ADR-008, ADR-010, ADR-011
 
 ## 1. Context
 

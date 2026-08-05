@@ -89,7 +89,7 @@ Team B is the open question. It's the most frontend-heavy role. Options:
 
 ### Gaps I found in the repo:
 
-1. **ADR-007 is missing.** Frontend architecture boundary model is referenced by ADR-012 and the delivery plan but the file doesn't exist. Needs to be created before Team B can start.
+1. **ADR-007 was missing.** Frontend architecture boundary model is referenced by ADR-012 and the delivery plan. **Resolved** — ADR-007 has been created.
 
 2. **Notifications ownership is unassigned.** CODEOWNERS puts `notifications/` under governor/architecture, not any team. Someone needs to own it — probably Team C since it involves background jobs and email delivery.
 
@@ -115,7 +115,7 @@ Team B is the open question. It's the most frontend-heavy role. Options:
 |------|-------|------|
 | Review this proposal | All | Before meeting |
 | Decide team assignments | All | At meeting |
-| Create ADR-007 (frontend boundaries) | Bryan/Governor | Before Wave 1 |
+| ~~Create ADR-007 (frontend boundaries)~~ ✅ Done | Bryan/Governor | Before Wave 1 |
 | Set up GitHub org teams + labels | Bryan | Before Wave 0 PR |
 | Wave 0 backend scaffold PR | Matt | Week after meeting |
 | Create GitHub Projects boards | TBD | Alongside Wave 0 |

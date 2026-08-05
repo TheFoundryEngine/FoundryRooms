@@ -1,10 +1,10 @@
 # ADR-009: Deployment Model and Infrastructure Baseline
 
-**Status:** Proposed  
-**Date:** 2026-04-02  
-**Owners:** Governor Agent / Project Architecture Group  
-**Supersedes:** None  
-**Related:** ADR-001, ADR-003, ADR-006, ADR-008
+- **Status:** Accepted
+- **Date:** 2026-04-02
+- **Owners:** Governor Agent / Project Architecture Group
+- **Supersedes:** None
+- **Related:** ADR-001, ADR-003, ADR-006, ADR-008
 
 ## 1. Context
 
@@ -194,10 +194,10 @@ This ADR does not yet finalize:
 
 Those remain subject to later ADRs so long as they honor this deployment baseline.
 
-## 8. Follow-up ADRs required
+## 8. Follow-on ADRs
 
-- ADR-010: Database access strategy and migration approach
-- ADR-011: Background jobs and workflow execution model
-- ADR-012: Object storage and media strategy
-- ADR-013: Video rooms and conferencing subsystem
-- ADR-014: AI-assisted product capabilities and provider strategy
+- ADR-010: Database access strategy and model synchronization
+- ADR-011: Background jobs and workflow execution
+- ADR-012: Interaction model and delivery semantics
+- ADR-013: Video rooms and conferencing subsystem (not yet created)
+- ADR-014: AI-assisted product capabilities (not yet created)

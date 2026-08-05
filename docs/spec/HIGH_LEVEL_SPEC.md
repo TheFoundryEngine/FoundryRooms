@@ -673,7 +673,7 @@ This spec does **not** point toward:
 
 ---
 
-## 19. ADRs This Spec Should Generate Next
+## 19. ADRs Generated From This Spec
 
 1. **ADR-001: system shape** — modular monolith with DDD and hexagonal backend boundaries
 2. **ADR-002: bounded context map** — module boundaries, ownership, dependency rules
@@ -681,8 +681,16 @@ This spec does **not** point toward:
 4. **ADR-004: integration model** — domain events, jobs, webhook handling, cross-context rules
 5. **ADR-005: identity and authorization** — auth approach, roles, access groups, entitlements
 6. **ADR-006: delivery governance** — protected `main`, short-lived branches, governor-agent rules, CI gates
-7. **ADR-007: frontend application model**
-8. **ADR-008: payments and entitlement model**
-9. **ADR-009: notifications and background jobs**
-10. **ADR-010: content and document approach**
+7. **ADR-007: frontend application architecture** — layered frontend model, boundary rules, SSR safety
+8. **ADR-008: technology stack and hosting model** — Nuxt, NestJS, PostgreSQL, Redis, S3, video subsystem
+9. **ADR-009: deployment model and infrastructure baseline** — container-first, vendor-neutral, self-hostable
+10. **ADR-010: database access strategy** — Drizzle ORM, model synchronization, anti-drift policy
+11. **ADR-011: background jobs and workflow execution** — BullMQ, Redis, bounded-context-owned handlers
+12. **ADR-012: interaction model and delivery semantics** — HTTP, SSE, WebSocket lanes, hydration rules
+
+### Future ADRs not yet created
+
+- **ADR-013:** Video rooms and conferencing subsystem boundary
+- **ADR-014:** AI-assisted product capabilities and provider strategy
+- **ADR-015:** API versioning and contract publication workflow
 

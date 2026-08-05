@@ -1,9 +1,9 @@
 # ADR-010: Database Access Strategy and Database/Backend Model Synchronization
 
-**Status:** Proposed  
-**Date:** 2026-04-02  
-**Owners:** Governor Agent / Project Architecture Group  
-**Related:** ADR-001, ADR-002, ADR-003, ADR-004, ADR-006, ADR-008, ADR-009
+- **Status:** Accepted
+- **Date:** 2026-04-02
+- **Owners:** Governor Agent / Project Architecture Group
+- **Related:** ADR-001, ADR-002, ADR-003, ADR-004, ADR-006, ADR-008, ADR-009
 
 ## 1. Context
 
@@ -328,9 +328,9 @@ Examples include:
 7. The domain layer must remain persistence-agnostic.
 8. SQL literacy is a project expectation for backend contributors.
 
-## 10. Follow-on ADRs likely required
+## 10. Follow-on ADRs
 
 - ADR-011: Background jobs and workflow execution
-- ADR-012: Object storage and media handling
-- ADR-013: Video rooms and conferencing subsystem
-- ADR-014: AI-assisted product capabilities and provider strategy
+- ADR-012: Interaction model and delivery semantics
+- ADR-013: Video rooms and conferencing subsystem (not yet created)
+- ADR-014: AI-assisted product capabilities (not yet created)

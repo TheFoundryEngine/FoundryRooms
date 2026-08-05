@@ -1,8 +1,9 @@
 # ADR-008: Technology Stack and Hosting Model
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-04-02
 - **Owners:** Architecture lead, Governor Agent, domain team leads
+- **Related:** ADR-001, ADR-002, ADR-003, ADR-006
 
 ## Context
 
@@ -134,13 +135,13 @@ This keeps the main product architecture stable.
 
 This ADR does **not** yet finalize:
 - the exact CSS/design-system stack
-- the exact ORM or query library
 - the exact auth provider implementation
-- the exact cloud hosting vendor
 - the exact email provider
 - the exact observability vendor
 
-Those may be decided in later ADRs.
+The following have been decided in follow-on ADRs:
+- ORM/query library: **Drizzle** (ADR-010)
+- Cloud hosting vendor: **Render** (API) + **Neon** (PostgreSQL) for managed hosting (ADR-009)
 
 ## Alternatives considered
 
@@ -214,11 +215,11 @@ This remains the strongest non-TypeScript backend alternative.
 - self-hosting requirements must be considered in future ADRs involving infrastructure, storage, auth, and observability
 - managed hosting features must not introduce irreversible architectural dependence on a vendor-specific runtime without ADR review
 
-## Follow-on ADRs likely required
+## Follow-on ADRs
 
-- ADR-009: Database access strategy and migration approach
-- ADR-010: Auth provider and identity implementation
-- ADR-011: Background jobs, queues, and workflow execution model
-- ADR-012: Object storage, media, and file handling
-- ADR-013: Video rooms and conferencing subsystem boundary
-- ADR-014: Deployment model for self-hosted and managed editions
+- ADR-009: Deployment model and infrastructure baseline
+- ADR-010: Database access strategy and model synchronization
+- ADR-011: Background jobs and workflow execution
+- ADR-012: Interaction model and delivery semantics
+- ADR-013: Video rooms and conferencing subsystem (not yet created)
+- ADR-014: AI-assisted product capabilities (not yet created)

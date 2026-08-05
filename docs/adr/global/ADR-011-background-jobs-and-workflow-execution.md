@@ -1,9 +1,9 @@
 # ADR-011: Background Jobs and Workflow Execution
 
-**Status:** Proposed  
-**Date:** 2026-04-02  
-**Owners:** Governor Agent / Project Architecture Group  
-**Related:** ADR-001, ADR-002, ADR-004, ADR-006, ADR-008, ADR-009, ADR-010
+- **Status:** Accepted
+- **Date:** 2026-04-02
+- **Owners:** Governor Agent / Project Architecture Group
+- **Related:** ADR-001, ADR-002, ADR-004, ADR-006, ADR-008, ADR-009, ADR-010
 
 ## 1. Context
 
