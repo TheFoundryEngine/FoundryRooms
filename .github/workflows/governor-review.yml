@@ -60,8 +60,10 @@ jobs:
             const isApproved = reviewText.includes('APPROVED');
 
             let event = 'COMMENT';
-            if (isApproved) event = 'APPROVE';
-            else if (isRejected || isChangesRequested) event = 'REQUEST_CHANGES';
+            if (isRejected || isChangesRequested) event = 'REQUEST_CHANGES';
+            // Note: APPROVE is not used because GitHub Actions cannot approve PRs
+            // by default. The governor-approved label + comment body signal approval.
+            // The auto-merge workflow still requires a separate human approval.
 
             await github.rest.pulls.createReview({
               owner,
