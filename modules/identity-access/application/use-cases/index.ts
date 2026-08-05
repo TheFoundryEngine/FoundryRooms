@@ -51,6 +51,15 @@ export {
 export { LogoutUseCase } from './logout.use-case';
 export type { LogoutInput, LogoutOutput, LogoutDeps } from './logout.use-case';
 
+// Refresh Session
+export { RefreshSessionUseCase } from './refresh-session.use-case';
+export type {
+  RefreshSessionInput,
+  RefreshSessionOutput,
+  RefreshSessionDeps,
+} from './refresh-session.use-case';
+export { SessionNotFoundError, SessionExpiredError } from './refresh-session.use-case';
+
 // Password Reset
 export {
   RequestPasswordResetUseCase,

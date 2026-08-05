@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import type { RegisterUserUseCase, RegisterUserOutput } from '../../application/use-cases/register-user.use-case';
 import type { LoginUseCase, LoginOutput } from '../../application/use-cases/login.use-case';
 import type { LogoutUseCase, LogoutOutput } from '../../application/use-cases/logout.use-case';
+import type { RefreshSessionUseCase, RefreshSessionOutput } from '../../application/use-cases/refresh-session.use-case';
 import {
   EmailAlreadyExistsError,
   InvalidPasswordError,
@@ -16,6 +17,10 @@ import {
   InvalidCredentialsError,
   AccountDeactivatedError,
 } from '../../application/use-cases/login.use-case';
+import {
+  SessionNotFoundError,
+  SessionExpiredError,
+} from '../../application/use-cases/refresh-session.use-case';
 import type { ActorId, Email, SessionToken } from '../../domain';
 
 // ============================================================================
@@ -40,6 +45,12 @@ function createMockLogoutUseCase(): LogoutUseCase {
   } as unknown as LogoutUseCase;
 }
 
+function createMockRefreshSessionUseCase(): RefreshSessionUseCase {
+  return {
+    execute: vi.fn(),
+  } as unknown as RefreshSessionUseCase;
+}
+
 function createMockResponse(): any {
   return {
     cookie: vi.fn(),
@@ -56,12 +67,19 @@ describe('AuthController', () => {
   let registerUserUseCase: RegisterUserUseCase;
   let loginUseCase: LoginUseCase;
   let logoutUseCase: LogoutUseCase;
+  let refreshSessionUseCase: RefreshSessionUseCase;
 
   beforeEach(() => {
     registerUserUseCase = createMockRegisterUserUseCase();
     loginUseCase = createMockLoginUseCase();
     logoutUseCase = createMockLogoutUseCase();
-    controller = new AuthController(registerUserUseCase, loginUseCase, logoutUseCase);
+    refreshSessionUseCase = createMockRefreshSessionUseCase();
+    controller = new AuthController(
+      registerUserUseCase,
+      loginUseCase,
+      logoutUseCase,
+      refreshSessionUseCase,
+    );
   });
 
   describe('register', () => {
@@ -265,6 +283,71 @@ describe('AuthController', () => {
       expect(result.success).toBe(true);
       expect(res.clearCookie).toHaveBeenCalled();
       expect(logoutUseCase.execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refresh', () => {
+    it('should refresh session successfully and set new cookie', async () => {
+      const input = {
+        refreshToken: 'a'.repeat(32),
+      };
+
+      const expiresAt = new Date(Date.now() + 86400000); // 24 hours
+      const output: RefreshSessionOutput = {
+        sessionToken: 'new-session-token-xyz' as SessionToken,
+        actorId: 'user-id-123' as ActorId,
+        actorType: 'user',
+        expiresAt,
+      };
+
+      vi.mocked(refreshSessionUseCase.execute).mockResolvedValue(output);
+      const res = createMockResponse();
+
+      const result = await controller.refresh(input, res);
+
+      expect(result.token).toBe('new-session-token-xyz');
+      expect(result.actor.id).toBe('user-id-123');
+      expect(result.actor.type).toBe('user');
+      expect(res.cookie).toHaveBeenCalledWith(
+        'fr_session',
+        'new-session-token-xyz',
+        expect.objectContaining({
+          httpOnly: true,
+          path: '/',
+        })
+      );
+    });
+
+    it('should throw BadRequestException for missing refreshToken', async () => {
+      const input = { refreshToken: '' };
+      const res = createMockResponse();
+
+      await expect(controller.refresh(input, res)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for short refreshToken', async () => {
+      const input = { refreshToken: 'short' };
+      const res = createMockResponse();
+
+      await expect(controller.refresh(input, res)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw UnauthorizedException when session not found', async () => {
+      const input = { refreshToken: 'a'.repeat(32) };
+
+      vi.mocked(refreshSessionUseCase.execute).mockRejectedValue(new SessionNotFoundError());
+      const res = createMockResponse();
+
+      await expect(controller.refresh(input, res)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException when session expired', async () => {
+      const input = { refreshToken: 'a'.repeat(32) };
+
+      vi.mocked(refreshSessionUseCase.execute).mockRejectedValue(new SessionExpiredError());
+      const res = createMockResponse();
+
+      await expect(controller.refresh(input, res)).rejects.toThrow(UnauthorizedException);
     });
   });
 });
