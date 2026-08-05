@@ -46,10 +46,44 @@ PAYLOAD=$(jq -n \
 
 RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
   -H "Authorization: Bearer ${LLM_API_KEY}" \
+  -H "HTTP-Referer: https://github.com/TheFoundryEngine/FoundryRooms" \
+  -H "X-Title: FoundryRooms Governor Agent" \
   -H "content-type: application/json" \
   -d "$PAYLOAD")
 
-REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "Governor Agent review failed -- check workflow logs."')
+# Log full response for debugging if something goes wrong
+echo "OpenRouter response (first 2000 chars):" >&2
+echo "$RESPONSE" | head -c 2000 >&2
+
+REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
+
+# If free model failed (rate limit, no free model available), try a specific free model as fallback
+if [ -z "$REVIEW" ] || [ "$REVIEW" = "null" ]; then
+  echo "Free model failed, trying fallback: meta-llama/llama-3.3-70b-instruct:free" >&2
+  PAYLOAD_FALLBACK=$(jq -n \
+    --arg system "$SYSTEM_PROMPT" \
+    --arg user "$USER_MESSAGE" \
+    '{
+      model: "meta-llama/llama-3.3-70b-instruct:free",
+      max_tokens: 1024,
+      messages: [
+        { role: "system", content: $system },
+        { role: "user", content: $user }
+      ]
+    }')
+
+  RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
+    -H "Authorization: Bearer ${LLM_API_KEY}" \
+    -H "HTTP-Referer: https://github.com/TheFoundryEngine/FoundryRooms" \
+    -H "X-Title: FoundryRooms Governor Agent" \
+    -H "content-type: application/json" \
+    -d "$PAYLOAD_FALLBACK")
+
+  echo "Fallback response (first 2000 chars):" >&2
+  echo "$RESPONSE" | head -c 2000 >&2
+
+  REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "Governor Agent review failed -- check workflow logs. Possible rate limit on free models."')
+fi
 
 echo "review<<EOF" >> "$GITHUB_OUTPUT"
 echo "$REVIEW" >> "$GITHUB_OUTPUT"
