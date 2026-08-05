@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 class HealthController {
   @Get()
   healthCheck() {
-    // A harmless comment to trigger the governor
+    // A harmless comment to trigger the governor review test
     return { status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() };
   }
 }
