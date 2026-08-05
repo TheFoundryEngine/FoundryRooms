@@ -90,13 +90,46 @@ Push to main (or PR → main)
 | Secret | Purpose |
 |---|---|
 | `DATABASE_URL` | Neon connection string (migrations + integration tests) |
-| `ANTHROPIC_API_KEY` | Governor Agent PR review |
+| `LLM_API_KEY` | OpenRouter API key for Governor Agent PR review (free tier) |
+| `LINEAR_API_KEY` | Linear API key for rejection notifications to Linear issues |
 | `RENDER_DEPLOY_HOOK_URL` | Optional — Render auto-deploys without it |
 
 > **⚠️ This is a public repo.** Never commit secrets, API keys, or connection strings.
 > All secrets are stored in GitHub Settings → Secrets → Actions and Render dashboard env vars.
 
 See [Infrastructure Setup Guide](docs/INFRASTRUCTURE_SETUP.md) for full setup details.
+
+## Governor Agent
+
+The Governor Agent is an automated PR reviewer powered by OpenRouter's free LLM models. It enforces ADR compliance, bounded context rules, and contract discipline on every PR targeting `main`.
+
+### How it works
+
+1. A PR is opened or updated targeting `main`
+2. The Governor Agent calls OpenRouter free models (fallback chain: Gemma, Nemotron, GPT-OSS, Cohere) to review the diff
+3. The review is posted as a GitHub PR review with one of three verdicts:
+   - **APPROVED** — safe to merge, no blocking issues (green `governor-approved` label)
+   - **CHANGES REQUESTED** — lists what must change before merge (red `governor-rejected` label)
+   - **REJECTED** — explains rule violations (red `governor-rejected` label)
+4. If rejected, the linked Linear issue gets a `blocked` label and a comment with the rejection reason
+5. Auto-merge only fires when all CI checks pass, the Governor approves, and a human approves
+
+### PR labels
+
+| Label | Color | Meaning |
+|---|---|---|
+| `governor-approved` | Green | Governor Agent approved the PR |
+| `governor-rejected` | Red | Governor Agent rejected the PR — see review comment |
+| `governor-review-failed` | Yellow | All free models exhausted — manual review required |
+
+### Free model notes
+
+OpenRouter's free model pool rotates availability. The script tries 6 models in order and uses the first that returns a valid verdict. If all are rate-limited, the PR gets a `governor-review-failed` label and a human review is needed. To check currently available free models:
+```bash
+curl -s https://openrouter.ai/api/v1/models | jq -r '.data[] | select(.id | test(":free$")) | .id'
+```
+
+See [Infrastructure Setup Guide](docs/INFRASTRUCTURE_SETUP.md) for setup details.
 
 ## Development Workflow (Linear + ADRs)
 
