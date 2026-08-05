@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 class HealthController {
   @Get()
   healthCheck() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return { status: 'ok', timestamp: new Date().toISOString(), version: '0.1.0' };
   }
 }
 
