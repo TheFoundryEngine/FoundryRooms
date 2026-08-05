@@ -98,3 +98,30 @@ jobs:
             });
 
             console.log(`PR #${pr.number} auto-merged successfully.`);
+
+      - name: Post merge-blocked comment
+        if: steps.checks.outputs.result != 'true' || steps.approval.outputs.result != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('No PR context, skipping comment.');
+              return;
+            }
+
+            const checksPassed = `${{ steps.checks.outputs.result }}` === 'true';
+            const hasApproval = `${{ steps.approval.outputs.result }}` === 'true';
+
+            let reasons = [];
+            if (!checksPassed) reasons.push('one or more required CI checks failed (lint, unit-tests, integration-tests, contract-tests, architecture-tests, build, or governor-review)');
+            if (!hasApproval) reasons.push('no human approval has been given yet');
+
+            const body = `## ⛔ Auto-merge blocked\n\nThis PR cannot be auto-merged because:\n\n${reasons.map(r => `- ${r}`).join('\n')}\n\n**What to do:**\n- Check the [Actions tab](${context.payload.pull_request.html_url}/checks) for failed checks\n- Read the Governor Agent review comment for any architectural issues\n- Fix the issues and push to this branch — checks will re-run automatically\n- Once all checks pass and a human approves, the PR will auto-merge`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: body
+            });
