@@ -81,3 +81,14 @@ jobs:
             try {
               await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [label] });
             } catch (e) { /* label may not exist yet, ignore */ }
+
+      - name: Notify Linear on rejection
+        if: always() && contains(steps.governor.outputs.review, 'REJECTED')
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          REVIEW_TEXT: ${{ steps.governor.outputs.review }}
+        run: bash scripts/linear-notify.sh

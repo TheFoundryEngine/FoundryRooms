@@ -57,6 +57,7 @@ Go to repo → Settings → Secrets and variables → Actions:
 |---|---|---|
 | `DATABASE_URL` | Neon connection string (migrations + deploy workflow) | Yes |
 | `LLM_API_KEY` | OpenRouter API key for Governor Agent PR review (free tier) | Yes |
+| `LINEAR_API_KEY` | Linear API key for rejection notifications to Linear issues | Yes |
 | `RENDER_DEPLOY_HOOK_URL` | Manual deploy trigger (optional — Render auto-deploys) | No |
 
 ---
@@ -166,6 +167,22 @@ To use a better model, update the `model` field in `scripts/governor-review.sh`:
 - `openrouter/free` → free (current)
 - `anthropic/claude-3.5-sonnet` → paid, better reasoning
 - `openai/gpt-4o` → paid, alternative
+
+### Linear integration
+When the Governor Agent rejects a PR, the workflow also updates the linked Linear issue:
+1. Parses the PR title/body for Linear issue IDs (e.g. `FRA-12`, `KSO-5`)
+2. Adds a comment to the Linear issue with the rejection reason and PR link
+3. Adds a red `blocked` label to the Linear issue
+
+**Setup:**
+1. Go to Linear Settings → API → Personal API keys → Generate new key
+2. Add it as a GitHub repository secret: `LINEAR_API_KEY`
+3. The `blocked` label has already been created in the Kaisoft team
+
+**Native GitHub integration (already connected):**
+- PR opened → Linear issue moves to "In Review"
+- PR merged → Linear issue auto-closes
+- These happen automatically via Linear's built-in GitHub connector
 
 ## Security Notes
 
