@@ -72,12 +72,16 @@ jobs:
             });
 
             // Add a label to make the status immediately visible
-            const label = isApproved ? 'governor-approved' : 'governor-rejected';
-            // Remove the opposite label if it exists
-            const oppositeLabel = isApproved ? 'governor-rejected' : 'governor-approved';
-            try {
-              await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name: oppositeLabel });
-            } catch (e) { /* label may not exist, ignore */ }
+            let label = 'governor-review-failed';
+            if (isApproved) label = 'governor-approved';
+            else if (isRejected || isChangesRequested) label = 'governor-rejected';
+
+            // Remove all governor labels first
+            for (const oldLabel of ['governor-approved', 'governor-rejected', 'governor-review-failed']) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name: oldLabel });
+              } catch (e) { /* label may not exist, ignore */ }
+            }
             try {
               await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [label] });
             } catch (e) { /* label may not exist yet, ignore */ }

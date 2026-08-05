@@ -32,39 +32,24 @@ Review this PR against your checklist. Be concise and specific. End your review 
 - CHANGES REQUESTED -- list what must change before merge
 - REJECTED -- explain what violated the rules and what must change"
 
-PAYLOAD=$(jq -n \
-  --arg system "$SYSTEM_PROMPT" \
-  --arg user "$USER_MESSAGE" \
-  '{
-    model: "openrouter/free",
-    max_tokens: 1024,
-    messages: [
-      { role: "system", content: $system },
-      { role: "user", content: $user }
-    ]
-  }')
+# Free model fallback chain — ordered by capability
+# Avoid openrouter/free (auto-selects unsuitable models like content safety classifiers)
+FREE_MODELS=(
+  "meta-llama/llama-3.3-70b-instruct:free"
+  "google/gemini-2.0-flash-exp:free"
+  "qwen/qwen-2.5-72b-instruct:free"
+  "mistralai/mistral-7b-instruct:free"
+)
 
-RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
-  -H "Authorization: Bearer ${LLM_API_KEY}" \
-  -H "HTTP-Referer: https://github.com/TheFoundryEngine/FoundryRooms" \
-  -H "X-Title: FoundryRooms Governor Agent" \
-  -H "content-type: application/json" \
-  -d "$PAYLOAD")
-
-# Log full response for debugging if something goes wrong
-echo "OpenRouter response (first 2000 chars):" >&2
-echo "$RESPONSE" | head -c 2000 >&2
-
-REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
-
-# If free model failed (rate limit, no free model available), try a specific free model as fallback
-if [ -z "$REVIEW" ] || [ "$REVIEW" = "null" ]; then
-  echo "Free model failed, trying fallback: meta-llama/llama-3.3-70b-instruct:free" >&2
-  PAYLOAD_FALLBACK=$(jq -n \
+REVIEW=""
+for MODEL in "${FREE_MODELS[@]}"; do
+  echo "Trying model: $MODEL" >&2
+  PAYLOAD=$(jq -n \
     --arg system "$SYSTEM_PROMPT" \
     --arg user "$USER_MESSAGE" \
+    --arg model "$MODEL" \
     '{
-      model: "meta-llama/llama-3.3-70b-instruct:free",
+      model: $model,
       max_tokens: 1024,
       messages: [
         { role: "system", content: $system },
@@ -77,12 +62,28 @@ if [ -z "$REVIEW" ] || [ "$REVIEW" = "null" ]; then
     -H "HTTP-Referer: https://github.com/TheFoundryEngine/FoundryRooms" \
     -H "X-Title: FoundryRooms Governor Agent" \
     -H "content-type: application/json" \
-    -d "$PAYLOAD_FALLBACK")
+    -d "$PAYLOAD")
 
-  echo "Fallback response (first 2000 chars):" >&2
+  echo "Response (first 2000 chars):" >&2
   echo "$RESPONSE" | head -c 2000 >&2
 
-  REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "Governor Agent review failed -- check workflow logs. Possible rate limit on free models."')
+  REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
+
+  # Validate the response contains a verdict keyword
+  if [ -n "$REVIEW" ] && [ "$REVIEW" != "null" ] && \
+     (echo "$REVIEW" | grep -qi "APPROVED" || \
+      echo "$REVIEW" | grep -qi "CHANGES REQUESTED" || \
+      echo "$REVIEW" | grep -qi "REJECTED"); then
+    echo "Got valid review with verdict from $MODEL" >&2
+    break
+  fi
+
+  echo "No verdict found in response from $MODEL, trying next model..." >&2
+  REVIEW=""
+done
+
+if [ -z "$REVIEW" ]; then
+  REVIEW="Governor Agent review failed — all free models exhausted or returned no verdict. Check workflow logs for details. Manual review required."
 fi
 
 echo "review<<EOF" >> "$GITHUB_OUTPUT"
