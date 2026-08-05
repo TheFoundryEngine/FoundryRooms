@@ -21,6 +21,8 @@ import {
   AGENT_REPOSITORY,
   SESSION_REPOSITORY,
   API_KEY_GENERATOR,
+  AGENT_CONTROLLER_AGENT_REPOSITORY,
+  AGENT_CONTROLLER_API_KEY_GENERATOR,
 } from '../modules/identity-access/adapters/inbound';
 
 import {
@@ -92,6 +94,15 @@ class NoopEventEmitter implements EventEmitterPort {
       useFactory: () => new CryptoApiKeyGenerator(),
     },
     {
+      provide: AGENT_CONTROLLER_AGENT_REPOSITORY,
+      useFactory: (db: any) => new AgentRepositoryDrizzle(db),
+      inject: ['PG_POOL'],
+    },
+    {
+      provide: AGENT_CONTROLLER_API_KEY_GENERATOR,
+      useFactory: () => new CryptoApiKeyGenerator(),
+    },
+    {
       provide: 'EVENT_EMITTER',
       useFactory: () => new NoopEventEmitter(),
     },
@@ -117,7 +128,7 @@ class NoopEventEmitter implements EventEmitterPort {
       provide: CREATE_AGENT_USE_CASE,
       useFactory: (agentRepo: AgentRepository, keyGen: ApiKeyGeneratorPort, emitter: EventEmitterPort) =>
         new CreateAgentUseCase({ agentRepository: agentRepo, apiKeyGenerator: keyGen, eventEmitter: emitter }),
-      inject: [AGENT_REPOSITORY, API_KEY_GENERATOR, 'EVENT_EMITTER'],
+      inject: [AGENT_CONTROLLER_AGENT_REPOSITORY, AGENT_CONTROLLER_API_KEY_GENERATOR, 'EVENT_EMITTER'],
     },
     AuthMiddleware,
   ],
