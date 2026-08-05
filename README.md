@@ -142,6 +142,49 @@ Push to main (or PR → main)
 
 See [Infrastructure Setup Guide](docs/INFRASTRUCTURE_SETUP.md) for full setup details.
 
+## Versioning & Releases
+
+FoundryRooms uses **semantic versioning** with automated releases driven by conventional commits.
+
+### Current phase: 0.x (pre-1.0)
+
+The project is in active development. Version numbers follow `0.minor.patch`:
+- `feat:` commits → **minor** bump (e.g. `0.1.0` → `0.2.0`)
+- `fix:` commits → **patch** bump (e.g. `0.1.0` → `0.1.1`)
+- `BREAKING CHANGE` → **minor** bump (not major — standard for 0.x)
+- `docs:`, `test:`, `chore:`, `ci:` → no release
+
+Once the API stabilizes, the project will move to `1.0.0` where breaking changes require major version bumps.
+
+### How releases work
+
+Releases are **automatic** — no manual tagging required:
+
+1. A PR is merged to `main` (squash merge, conventional commit title)
+2. The release workflow analyzes commits since the last tag
+3. If there are releasable changes, it automatically:
+   - Bumps the version in `package.json`
+   - Creates a git tag (e.g. `v0.1.0`)
+   - Updates `CHANGELOG.md`
+   - Creates a GitHub Release with auto-generated notes
+
+### Conventional commit format
+
+Commit messages (and PR titles for squash merges) must use conventional prefixes:
+
+| Prefix | Triggers release? | Version bump |
+|---|---|---|
+| `feat:` | Yes | minor |
+| `fix:` | Yes | patch |
+| `BREAKING CHANGE:` | Yes | minor (0.x) / major (1.x) |
+| `docs:` | No | — |
+| `test:` | No | — |
+| `chore:` | No | — |
+| `ci:` | No | — |
+| `refactor:` | No | — |
+
+See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for full rules.
+
 ## Governor Agent
 
 The Governor Agent is an automated PR reviewer powered by OpenRouter's free LLM models. It enforces ADR compliance, bounded context rules, and contract discipline on every PR targeting `main`.

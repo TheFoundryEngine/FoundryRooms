@@ -27,11 +27,12 @@ ${DIFF}
 
 == Instructions ==
 
-Review this PR against your checklist. Be concise and specific. End your review with exactly one of:
+Review this PR against your checklist. Be concise and specific. End your review with a final line containing exactly one verdict (nothing else on that line):
 - APPROVED -- safe to merge, no blocking issues
 - CHANGES REQUESTED -- advisory concerns (cohesion, design alignment, non-blocking suggestions); the team is notified via Linear but the PR is NOT blocked
 - REJECTED -- hard rule violation (boundary breach, contract drift, missing tests, undocumented architecture change); the PR IS blocked from merge
 
+The verdict must be the LAST line of your review, on its own line, with no other text.
 Use CHANGES REQUESTED for concerns that should be tracked but do not warrant blocking the merge.
 Use REJECTED only for hard rule violations."
 
@@ -55,7 +56,7 @@ for MODEL in "${FREE_MODELS[@]}"; do
     --arg model "$MODEL" \
     '{
       model: $model,
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: [
         { role: "system", content: $system },
         { role: "user", content: $user }
@@ -74,11 +75,14 @@ for MODEL in "${FREE_MODELS[@]}"; do
 
   REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
 
-  # Validate the response contains a verdict keyword
+  # Validate the response contains a verdict keyword in the last 5 lines
+  # (the verdict should be at the end of the review, not in the body text
+  # where keywords like "REJECTED" may appear while describing the PR)
+  REVIEW_TAIL=$(echo "$REVIEW" | tail -5)
   if [ -n "$REVIEW" ] && [ "$REVIEW" != "null" ] && \
-     (echo "$REVIEW" | grep -qi "APPROVED" || \
-      echo "$REVIEW" | grep -qi "CHANGES REQUESTED" || \
-      echo "$REVIEW" | grep -qi "REJECTED"); then
+     (echo "$REVIEW_TAIL" | grep -qi "APPROVED" || \
+      echo "$REVIEW_TAIL" | grep -qi "CHANGES REQUESTED" || \
+      echo "$REVIEW_TAIL" | grep -qi "REJECTED"); then
     echo "Got valid review with verdict from $MODEL" >&2
     break
   fi
@@ -95,24 +99,29 @@ echo "review<<EOF" >> "$GITHUB_OUTPUT"
 echo "$REVIEW" >> "$GITHUB_OUTPUT"
 echo "EOF" >> "$GITHUB_OUTPUT"
 
-# Determine verdict for the workflow
+# Determine verdict from the last 5 lines of the review
+# (verdict keywords may appear in the body when describing the PR's changes,
+# so we only look at the tail where the actual verdict should be)
+REVIEW_TAIL=$(echo "$REVIEW" | tail -5)
 VERDICT="unknown"
-if echo "$REVIEW" | grep -qi "APPROVED"; then
+if echo "$REVIEW_TAIL" | grep -qi "APPROVED"; then
   VERDICT="approved"
-elif echo "$REVIEW" | grep -qi "CHANGES REQUESTED"; then
+elif echo "$REVIEW_TAIL" | grep -qi "CHANGES REQUESTED"; then
   VERDICT="changes-requested"
-elif echo "$REVIEW" | grep -qi "REJECTED"; then
+elif echo "$REVIEW_TAIL" | grep -qi "REJECTED"; then
   VERDICT="rejected"
 fi
 echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
 
 # Only REJECTED blocks the merge (exit 1 fails the check).
 # CHANGES REQUESTED is advisory — the check passes, Linear is notified, PR can merge.
-if echo "$REVIEW" | grep -q "REJECTED"; then
+if [ "$VERDICT" = "rejected" ]; then
   echo "Governor Agent rejected this PR. See PR comment for details."
   exit 1
 fi
 
 if [ "$VERDICT" = "changes-requested" ]; then
   echo "Governor Agent flagged advisory changes. PR is not blocked. Linear will be notified."
+elif [ "$VERDICT" = "unknown" ]; then
+  echo "Warning: Governor Agent did not output a clear verdict. Manual review recommended." >&2
 fi
