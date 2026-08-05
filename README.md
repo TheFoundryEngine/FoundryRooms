@@ -50,12 +50,61 @@ FoundryRooms is built as a **modular monolith** with:
 - **Team B (Experience Layer)** - Engagement + Resources + member-facing contracts
 - **Team C (Operations & Monetization)** - Events + Commerce + Automation + Admin
 
+## CI/CD Pipeline
+
+The repository uses GitHub Actions for continuous integration and deployment.
+
+### Flow
+
+```
+Push to main (or PR → main)
+    │
+    ├──► CI workflow (.github/workflows/ci.yml)
+    │      ├── lint
+    │      ├── unit-tests (433 tests via vitest)
+    │      ├── integration-tests (PostgreSQL service container)
+    │      ├── contract-tests
+    │      ├── architecture-tests
+    │      └── build + typecheck (gated on all above passing)
+    │
+    └──► Render auto-deploys (builds Docker image from Dockerfile)
+              ↓
+         Deploy workflow (.github/workflows/deploy.yml)
+         (ONLY runs after CI passes ✅)
+              ├── drizzle-kit push → Neon (creates/updates DB tables)
+              └── Render deploy hook (optional)
+```
+
+### Hosting
+
+| Service | Purpose | Plan |
+|---|---|---|
+| **Render** | NestJS API server (Docker) | Free (spins down after 15 min idle) |
+| **Neon** | PostgreSQL database | Free (500MB, always-on) |
+
+- **API URL**: https://foundryrooms-api.onrender.com
+- **Health check**: `/api/v1/auth/health`
+
+### Required GitHub Secrets
+
+| Secret | Purpose |
+|---|---|
+| `DATABASE_URL` | Neon connection string (migrations + integration tests) |
+| `ANTHROPIC_API_KEY` | Governor Agent PR review |
+| `RENDER_DEPLOY_HOOK_URL` | Optional — Render auto-deploys without it |
+
+> **⚠️ This is a public repo.** Never commit secrets, API keys, or connection strings.
+> All secrets are stored in GitHub Settings → Secrets → Actions and Render dashboard env vars.
+
+See [Infrastructure Setup Guide](docs/INFRASTRUCTURE_SETUP.md) for full setup details.
+
 ## Documentation
 
 - [Product & Architecture Spec](docs/spec/HIGH_LEVEL_SPEC.md)
 - [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md)
 - [Architecture Decision Records](docs/adr/)
 - [Agent Operating Rules](AGENTS.md)
+- [Infrastructure & CI/CD Setup](docs/INFRASTRUCTURE_SETUP.md)
 
 ## Getting Started
 

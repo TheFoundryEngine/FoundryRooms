@@ -1,87 +1,108 @@
-# FoundryRooms — Infrastructure Setup Guide
+# FoundryRooms — Infrastructure & CI/CD Guide
 
-This guide covers the one-time setup needed to enable the fully automated CI/CD pipeline.
+This guide documents the hosting, CI/CD pipeline, and secrets management for the FoundryRooms project.
+
+> **⚠️ This is a public repository.** Never commit secrets, API keys, or connection strings.
+> All secrets are stored in GitHub Settings → Secrets → Actions and the Render dashboard.
 
 ## Architecture
 
 ```
-Dev pushes → PR → CI checks (lint, test, build) → merge to main → Render deploys → live in browser
+Push to main (or PR → main)
+    │
+    ├──► CI workflow (.github/workflows/ci.yml)
+    │      ├── lint
+    │      ├── unit-tests (433 tests via vitest)
+    │      ├── integration-tests (PostgreSQL service container)
+    │      ├── contract-tests
+    │      ├── architecture-tests
+    │      └── build + typecheck (gated on all above passing)
+    │
+    └──► Render auto-deploys (builds Docker image from Dockerfile)
+              ↓
+         Deploy workflow (.github/workflows/deploy.yml)
+         (ONLY runs after CI passes ✅)
+              ├── drizzle-kit push → Neon (creates/updates DB tables)
+              └── Render deploy hook (optional — Render auto-deploys without it)
 ```
 
 ### Hosting
 
-| Service | Purpose | Free Tier |
+| Service | Purpose | Plan | URL |
+|---|---|---|---|
+| **Render** | NestJS API server (Docker) | Free (spins down after 15 min idle) | https://foundryrooms-api.onrender.com |
+| **Neon** | PostgreSQL database | Free (500MB, always-on, no expiry) | Neon dashboard |
+
+### Render Service Configuration
+
+- **Runtime**: Docker (`./Dockerfile`)
+- **Branch**: `main` (auto-deploy on push)
+- **Region**: Oregon
+- **Plan**: Free
+
+### Environment Variables (Render Dashboard)
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Neon connection string |
+| `NODE_ENV` | `production` |
+| `PORT` | `3000` |
+| `CORS_ORIGIN` | `*` (update to frontend URL when ready) |
+
+### GitHub Repository Secrets
+
+Go to repo → Settings → Secrets and variables → Actions:
+
+| Secret | Purpose | Required |
 |---|---|---|
-| **Render** | NestJS API server (Docker) | Free plan (spins down after 15 min idle) |
-| **Neon** | PostgreSQL database | 500MB, always-on, no expiry |
+| `DATABASE_URL` | Neon connection string (migrations + deploy workflow) | Yes |
+| `ANTHROPIC_API_KEY` | Governor Agent PR review workflow | Yes |
+| `RENDER_DEPLOY_HOOK_URL` | Manual deploy trigger (optional — Render auto-deploys) | No |
 
 ---
 
-## Step 1: Create a Neon database
+## Setup (already completed)
 
-1. Go to [neon.tech](https://neon.tech) and sign up (free, no credit card)
-2. Create a new project — call it `foundryrooms`
-3. Copy the connection string (looks like `postgres://user:pass@ep-xxx.neon.tech/foundryrooms?sslmode=require`)
-4. Save this — you'll need it for both Render and GitHub
+The infrastructure is already set up and running. This section documents what was done for reference.
 
-## Step 2: Create a Render web service
+### 1. Neon Database
 
-1. Go to [render.com](https://render.com) and sign up (free)
-2. New → Web Service → connect your GitHub repo `TheFoundryEngine/FoundryRooms`
-3. Settings:
-   - **Name**: `foundryrooms-api`
-   - **Runtime**: Docker
-   - **Dockerfile path**: `./Dockerfile`
-   - **Plan**: Free
-4. Environment variables:
-   - `DATABASE_URL` = your Neon connection string
-   - `NODE_ENV` = `production`
-   - `PORT` = `3000`
-   - `CORS_ORIGIN` = `*` (or your frontend URL when ready)
-5. Create the service — Render will build and deploy
+- Created a Neon project at [neon.tech](https://neon.tech)
+- Connection string stored in GitHub secrets (`DATABASE_URL`) and Render env vars
+- Tables created via `drizzle-kit push`
 
-## Step 3: Get Render deploy hook URL
+### 2. Render Web Service
 
-1. In Render: your service → Settings → Deploy Hook
-2. Create a deploy hook and copy the URL
-3. This URL triggers a redeploy when called via POST
+- Created via Render MCP server
+- Connected to GitHub repo `TheFoundryEngine/FoundryRooms`
+- Docker runtime, free plan, Oregon region
+- Auto-deploy enabled on `main` branch
 
-## Step 4: Add GitHub repository secrets
+### 3. Database Migrations
 
-Go to your GitHub repo → Settings → Secrets and variables → Actions → New repository secret:
+Migrations run automatically in the Deploy workflow after CI passes.
 
-| Secret name | Value |
-|---|---|
-| `RENDER_DEPLOY_HOOK_URL` | Your Render deploy hook URL |
-| `ANTHROPIC_API_KEY` | Your Anthropic API key (for Governor Agent review) |
-
-## Step 5: Run database migrations
-
-After the first deploy, run the Drizzle migrations against your Neon database:
+To run manually:
 
 ```bash
 DATABASE_URL="your-neon-connection-string" npx drizzle-kit push
 ```
 
-## Step 6: Verify the pipeline
+### 4. Verify the Pipeline
 
-1. Create a feature branch: `git checkout -b feat/test-pipeline`
-2. Make a small change and push
+1. Create a feature branch: `git checkout -b feat/my-feature`
+2. Make changes and push
 3. Open a PR targeting `main`
-4. Watch CI checks run:
-   - `lint` — eslint (if configured)
-   - `unit-tests` — vitest (433 tests)
-   - `integration-tests` — vitest with PostgreSQL service
-   - `contract-tests` — contract validation
-   - `architecture-tests` — boundary checks (placeholder)
-   - `build` — tsc compilation + typecheck
-5. After merge to `main`, the Deploy workflow triggers Render
-6. Visit your Render URL to see the API live:
+4. CI checks run automatically (lint, tests, build)
+5. After merge to `main`:
+   - Render auto-builds and deploys
+   - Deploy workflow runs migrations on Neon
+6. Verify the API is live:
    - `https://foundryrooms-api.onrender.com/api/v1/auth/health` → `{"status":"ok"}`
 
 ---
 
-## Local development
+## Local Development
 
 ```bash
 # Install dependencies
@@ -112,3 +133,10 @@ DATABASE_URL="postgres://..." npm run start:dev
 | GET | `/api/v1/agents/:id` | Get agent details (requires auth) |
 | POST | `/api/v1/agents/:id/rotate-key` | Rotate API key (requires auth) |
 | DELETE | `/api/v1/agents/:id` | Deactivate agent (requires auth) |
+
+## Security Notes
+
+- **Never commit secrets** — `.env` files are gitignored
+- **All secrets** live in GitHub Secrets and Render dashboard env vars
+- **MCP server configs** (Render, Neon) are stored in `~/.codeium/windsurf/mcp_config.json` — outside the repo
+- **Rotate keys** if they are ever exposed in chat, screenshots, or logs
