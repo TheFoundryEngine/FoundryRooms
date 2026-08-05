@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 class HealthController {
   @Get()
   healthCheck() {
-    // Governor review test v2 — verify free model fallback chain
+    // Governor review test v3 — verify free model fallback chain
     return { status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() };
   }
 }
