@@ -114,10 +114,17 @@ jobs:
             const hasApproval = `${{ steps.approval.outputs.result }}` === 'true';
 
             let reasons = [];
-            if (!checksPassed) reasons.push('one or more required CI checks failed (lint, unit-tests, integration-tests, contract-tests, architecture-tests, build, or governor-review)');
-            if (!hasApproval) reasons.push('no human approval has been given yet');
+            if (!checksPassed) reasons.push('one or more required CI checks have not passed yet (lint, unit-tests, integration-tests, contract-tests, architecture-tests, build, or governor-review)');
+            if (!hasApproval) reasons.push('waiting for human approval — a team member must review and approve this PR');
 
-            const body = `## ⛔ Auto-merge blocked\n\nThis PR cannot be auto-merged because:\n\n${reasons.map(r => `- ${r}`).join('\n')}\n\n**What to do:**\n- Check the [Actions tab](${context.payload.pull_request.html_url}/checks) for failed checks\n- Read the Governor Agent review comment for any architectural issues\n- Fix the issues and push to this branch — checks will re-run automatically\n- Once all checks pass and a human approves, the PR will auto-merge`;
+            let actions = [];
+            if (!checksPassed) actions.push('Check the [Actions tab](${pr.html_url}/checks) for any failed checks');
+            if (!checksPassed) actions.push('Read the Governor Agent review comment for any architectural issues');
+            if (!checksPassed) actions.push('Fix any issues and push to this branch — checks will re-run automatically');
+            if (!hasApproval) actions.push('Request a review from a team member');
+            actions.push('Once all checks pass and a human approves, the PR will auto-merge');
+
+            const body = `## ⏳ Auto-merge pending\n\nThis PR is waiting on:\n\n${reasons.map(r => `- ${r}`).join('\n')}\n\n**Next steps:**\n${actions.map(a => `- ${a}`).join('\n')}`;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
