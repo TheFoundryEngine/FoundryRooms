@@ -1,6 +1,6 @@
 # ADR-F-A-001: Auth and Session Foundation
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-05
 - **Owners:** Team A lead, paired agent
 - **Related:** ADR-001, ADR-002, ADR-003, ADR-005, ADR-010, ADR-012
@@ -18,43 +18,51 @@ The system is a modular monolith (ADR-001) with hexagonal boundaries. Auth must 
 ## Decision
 
 ### Session model
-- **JWT-based access tokens** with short expiry (15 min) for API auth
-- **Refresh tokens** stored server-side with rotation on use, 7-day expiry
+- **Opaque session tokens** (cryptographically secure random bytes, base64url-encoded, 43 chars)
+- Token stored as SHA-256 hash in DB (plaintext never persisted)
 - **Session record** persisted in the database for audit and revocation
-- Token payload contains: `userId`, `communityId` (when selected), `role`, token version
+- Session durations: SHORT (1h), DEFAULT (24h), EXTENDED (7d)
+- Session carries actorId + actorType (User or Agent)
+
+> **Note:** The original draft of this ADR specified JWT-based access tokens.
+> The implementation uses opaque session tokens instead because:
+> (1) every request already requires a DB lookup for authorization checks,
+>     so JWT's stateless advantage doesn't apply;
+> (2) opaque tokens are simpler to revoke and rotate;
+> (3) no cross-service token verification is needed in a modular monolith.
+> The ADR was updated to match the working, tested implementation.
 
 ### Auth flows
-- **Register**: email + password → create user → create session → return tokens
-- **Login**: email + password → validate → create session → return tokens
-- **Refresh**: refresh token → validate + rotate → return new access token
-- **Logout**: invalidate session record + clear refresh token
-- **Password reset**: email-triggered reset flow with time-limited tokens
+- **Register**: email + password → create user → create session → return session token (cookie)
+- **Login**: email + password → validate → create session → return session token (cookie)
+- **Refresh**: session token → validate + rotate token → return new session token
+- **Logout**: delete session record + clear cookie
+- **Password reset**: email-triggered reset flow with time-limited reset tokens
 
 ### Adapter boundaries
-- `domain/`: User entity, Session entity, auth policies, password hashing interface
-- `application/`: RegisterUseCase, LoginUseCase, RefreshSessionUseCase, LogoutUseCase
-- `adapters/`: JWT adapter, password hashing adapter (bcrypt), session repository
-- `contracts/`: AuthRequest/AuthResponse DTOs, token shape, session contract
+- `domain/`: User entity, Session entity, Actor entity, Agent entity, auth policies
+- `application/`: RegisterUseCase, LoginUseCase, RefreshSessionUseCase, LogoutUseCase, ResetPasswordUseCase
+- `adapters/`: password hashing adapter (bcrypt), session repository (Drizzle), auth middleware (NestJS)
+- `contracts/`: AuthRequest/AuthResponse DTOs, session contract, auth contract
 
 ### Rules
 - passwords hashed with bcrypt, minimum cost factor 12
-- refresh tokens are single-use and rotated on each refresh
-- session records are auditable (created, last refreshed, revoked)
-- token version allows global session invalidation
+- session tokens are opaque (not JWT) — SHA-256 hashed at rest
+- session records are auditable (created, last accessed, expires)
 - all auth endpoints enforce rate limiting at the adapter layer
 - no auth logic in frontend — frontend consumes auth contracts only
 
 ## Consequences
 
 ### Positive
-- standard, well-understood session model
+- simple, well-understood opaque token model
 - server-side session records enable revocation and audit
-- refresh token rotation limits replay attack window
+- token rotation on refresh limits replay attack window
 - clean contract boundary for Team B to consume
+- no JWT complexity (no key management, no algorithm selection, no stateless illusion)
 
 ### Negative
-- JWT statelessness means token version checks require a DB lookup on each request
-- refresh token rotation adds complexity to the refresh flow
+- every request requires DB lookup to validate token (acceptable — authz needs it anyway)
 - rate limiting must be tuned to avoid blocking legitimate users
 
 ## Rules implied by this decision

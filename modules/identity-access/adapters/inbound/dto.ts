@@ -98,6 +98,40 @@ export class LogoutResponseDto {
   }
 }
 
+/**
+ * Request body for session refresh
+ */
+export class RefreshTokenDto {
+  refreshToken!: string;
+}
+
+/**
+ * Response for session refresh
+ */
+export class RefreshTokenResponseDto {
+  token!: string;
+  actor!: ActorSummaryDto;
+  expiresAt!: string;
+
+  static fromOutput(output: {
+    sessionToken: SessionToken;
+    actorId: ActorId;
+    actorType: ActorType;
+    expiresAt: Date;
+  }): RefreshTokenResponseDto {
+    const dto = new RefreshTokenResponseDto();
+    dto.token = output.sessionToken;
+    dto.actor = {
+      id: output.actorId,
+      type: output.actorType,
+      displayName: '',
+      avatarUrl: null,
+    };
+    dto.expiresAt = output.expiresAt.toISOString();
+    return dto;
+  }
+}
+
 // ============================================================================
 // Actor DTOs
 // ============================================================================

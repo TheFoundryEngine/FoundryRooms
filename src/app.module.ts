@@ -18,12 +18,16 @@ import {
   REGISTER_USER_USE_CASE,
   LOGIN_USE_CASE,
   LOGOUT_USE_CASE,
+  REFRESH_SESSION_USE_CASE,
   CREATE_AGENT_USE_CASE,
   AGENT_REPOSITORY,
   SESSION_REPOSITORY,
   API_KEY_GENERATOR,
   AGENT_CONTROLLER_AGENT_REPOSITORY,
   AGENT_CONTROLLER_API_KEY_GENERATOR,
+  RateLimitGuard,
+  InMemoryRateLimitStore,
+  RATE_LIMIT_OPTIONS,
 } from '../modules/identity-access/adapters/inbound';
 
 import {
@@ -47,6 +51,7 @@ import type { EventEmitterPort, DomainEvent } from '../modules/identity-access/a
 import { RegisterUserUseCase } from '../modules/identity-access/application/use-cases/register-user.use-case';
 import { LoginUseCase } from '../modules/identity-access/application/use-cases/login.use-case';
 import { LogoutUseCase } from '../modules/identity-access/application/use-cases/logout.use-case';
+import { RefreshSessionUseCase } from '../modules/identity-access/application/use-cases/refresh-session.use-case';
 import { CreateAgentUseCase } from '../modules/identity-access/application/use-cases/create-agent.use-case';
 
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -126,12 +131,24 @@ class NoopEventEmitter implements EventEmitterPort {
       inject: [SESSION_REPOSITORY],
     },
     {
+      provide: REFRESH_SESSION_USE_CASE,
+      useFactory: (sessionRepo: SessionRepository) =>
+        new RefreshSessionUseCase({ sessionRepository: sessionRepo }),
+      inject: [SESSION_REPOSITORY],
+    },
+    {
       provide: CREATE_AGENT_USE_CASE,
       useFactory: (agentRepo: AgentRepository, keyGen: ApiKeyGeneratorPort, emitter: EventEmitterPort) =>
         new CreateAgentUseCase({ agentRepository: agentRepo, apiKeyGenerator: keyGen, eventEmitter: emitter }),
       inject: [AGENT_CONTROLLER_AGENT_REPOSITORY, AGENT_CONTROLLER_API_KEY_GENERATOR, 'EVENT_EMITTER'],
     },
     AuthMiddleware,
+    InMemoryRateLimitStore,
+    {
+      provide: RATE_LIMIT_OPTIONS,
+      useValue: { windowMs: 60 * 1000, maxRequests: 10 },
+    },
+    RateLimitGuard,
   ],
 })
 export class AppModule implements NestModule {

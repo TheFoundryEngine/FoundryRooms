@@ -5,6 +5,7 @@
  * - POST /auth/register - Register a new user
  * - POST /auth/login - Login with email/password
  * - POST /auth/logout - Logout (requires auth)
+ * - POST /auth/refresh - Refresh a session token
  */
 
 import {
@@ -28,12 +29,16 @@ import {
   LoginDto,
   LoginResponseDto,
   LogoutResponseDto,
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
   type ActorContext,
 } from './dto';
 import { AuthGuard, Actor } from './auth.middleware';
+import { RateLimitGuard } from './rate-limit.middleware';
 import type { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import type { LoginUseCase } from '../../application/use-cases/login.use-case';
 import type { LogoutUseCase } from '../../application/use-cases/logout.use-case';
+import type { RefreshSessionUseCase } from '../../application/use-cases/refresh-session.use-case';
 import {
   EmailAlreadyExistsError,
   InvalidPasswordError,
@@ -42,11 +47,16 @@ import {
   InvalidCredentialsError,
   AccountDeactivatedError,
 } from '../../application/use-cases/login.use-case';
+import {
+  SessionNotFoundError,
+  SessionExpiredError,
+} from '../../application/use-cases/refresh-session.use-case';
 
 // Import Zod schemas from contracts for validation
 import {
   CreateUserRequest,
   LoginRequest,
+  RefreshTokenRequest,
 } from '../../../../contracts/api/identity-access';
 
 // ============================================================================
@@ -56,6 +66,7 @@ import {
 export const REGISTER_USER_USE_CASE = Symbol('REGISTER_USER_USE_CASE');
 export const LOGIN_USE_CASE = Symbol('LOGIN_USE_CASE');
 export const LOGOUT_USE_CASE = Symbol('LOGOUT_USE_CASE');
+export const REFRESH_SESSION_USE_CASE = Symbol('REFRESH_SESSION_USE_CASE');
 
 // ============================================================================
 // Constants
@@ -82,6 +93,8 @@ export class AuthController {
     private readonly loginUseCase: LoginUseCase,
     @Inject(LOGOUT_USE_CASE)
     private readonly logoutUseCase: LogoutUseCase,
+    @Inject(REFRESH_SESSION_USE_CASE)
+    private readonly refreshSessionUseCase: RefreshSessionUseCase,
   ) {}
 
   /**
@@ -90,6 +103,7 @@ export class AuthController {
    * Register a new user account.
    */
   @Post('register')
+  @UseGuards(RateLimitGuard)
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() body: RegisterUserDto): Promise<RegisterUserResponseDto> {
     // Validate request body with Zod schema
@@ -125,6 +139,7 @@ export class AuthController {
    * Sets a session cookie on success.
    */
   @Post('login')
+  @UseGuards(RateLimitGuard)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() body: LoginDto,
@@ -189,5 +204,47 @@ export class AuthController {
 
     // For API key auth, just return success (no session to invalidate)
     return LogoutResponseDto.fromOutput({ success: true });
+  }
+
+  /**
+   * POST /auth/refresh
+   *
+   * Refresh a session token. Rotates the session, invalidating the old token
+   * and issuing a new one. Sets a new session cookie on success.
+   */
+  @Post('refresh')
+  @UseGuards(RateLimitGuard)
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Body() body: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RefreshTokenResponseDto> {
+    // Validate request body with Zod schema
+    const validation = RefreshTokenRequest.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`);
+      throw new BadRequestException(errors.join('; '));
+    }
+
+    try {
+      const result = await this.refreshSessionUseCase.execute(validation.data.refreshToken);
+
+      // Set new session cookie
+      const maxAge = result.expiresAt.getTime() - Date.now();
+      res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
+        ...SESSION_COOKIE_OPTIONS,
+        maxAge,
+      });
+
+      return RefreshTokenResponseDto.fromOutput(result);
+    } catch (error) {
+      if (error instanceof SessionNotFoundError) {
+        throw new UnauthorizedException('Invalid or unknown session');
+      }
+      if (error instanceof SessionExpiredError) {
+        throw new UnauthorizedException('Session has expired');
+      }
+      throw error;
+    }
   }
 }

@@ -75,3 +75,16 @@ export const LogoutResponse = z.object({
   message: z.string(),
 });
 export type LogoutResponse = z.infer<typeof LogoutResponse>;
+
+// Refresh Token schemas
+export const RefreshTokenRequest = z.object({
+  refreshToken: SessionToken,
+});
+export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequest>;
+
+export const RefreshTokenResponse = z.object({
+  token: SessionToken,
+  actor: ActorSummary,
+  expiresAt: z.string().datetime(),
+});
+export type RefreshTokenResponse = z.infer<typeof RefreshTokenResponse>;

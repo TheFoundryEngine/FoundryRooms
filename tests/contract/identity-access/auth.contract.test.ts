@@ -177,6 +177,79 @@ describe('Auth Contract Tests', () => {
     });
   });
 
+  describe('POST /auth/refresh', () => {
+    describe('RefreshTokenRequest', () => {
+      it('should accept valid refresh token request', () => {
+        const validRequest = {
+          refreshToken: 'a'.repeat(32),
+        };
+        const result = IdentityAccessApi.RefreshTokenRequest.safeParse(validRequest);
+        expect(result.success).toBe(true);
+      });
+
+      it('should reject request with missing refreshToken', () => {
+        const invalidRequest = {};
+        const result = IdentityAccessApi.RefreshTokenRequest.safeParse(invalidRequest);
+        expect(result.success).toBe(false);
+      });
+
+      it('should reject request with short refreshToken', () => {
+        const invalidRequest = {
+          refreshToken: 'short',
+        };
+        const result = IdentityAccessApi.RefreshTokenRequest.safeParse(invalidRequest);
+        expect(result.success).toBe(false);
+      });
+    });
+
+    describe('RefreshTokenResponse', () => {
+      it('should accept valid refresh token response for user', () => {
+        const validResponse = {
+          token: 'x'.repeat(32),
+          actor: {
+            id: '11111111-1111-1111-1111-111111111111',
+            type: 'user',
+            displayName: 'Alice Johnson',
+            avatarUrl: null,
+          },
+          expiresAt: '2024-01-15T12:00:00Z',
+        };
+        const result = IdentityAccessApi.RefreshTokenResponse.safeParse(validResponse);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept valid refresh token response for agent', () => {
+        const validResponse = {
+          token: 'y'.repeat(32),
+          actor: {
+            id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            type: 'agent',
+            displayName: 'Community Bot',
+            avatarUrl: null,
+          },
+          expiresAt: '2024-01-15T12:00:00Z',
+        };
+        const result = IdentityAccessApi.RefreshTokenResponse.safeParse(validResponse);
+        expect(result.success).toBe(true);
+      });
+
+      it('should reject response with invalid token', () => {
+        const invalidResponse = {
+          token: 'short',
+          actor: {
+            id: '11111111-1111-1111-1111-111111111111',
+            type: 'user',
+            displayName: 'Alice Johnson',
+            avatarUrl: null,
+          },
+          expiresAt: '2024-01-15T12:00:00Z',
+        };
+        const result = IdentityAccessApi.RefreshTokenResponse.safeParse(invalidResponse);
+        expect(result.success).toBe(false);
+      });
+    });
+  });
+
   describe('POST /auth/password-reset', () => {
     describe('PasswordResetRequestSchema', () => {
       it('should accept valid password reset request', () => {

@@ -5,7 +5,7 @@
  */
 
 // Controllers
-export { AuthController, REGISTER_USER_USE_CASE, LOGIN_USE_CASE, LOGOUT_USE_CASE } from './auth.controller';
+export { AuthController, REGISTER_USER_USE_CASE, LOGIN_USE_CASE, LOGOUT_USE_CASE, REFRESH_SESSION_USE_CASE } from './auth.controller';
 export { AgentController, CREATE_AGENT_USE_CASE, AGENT_REPOSITORY as AGENT_CONTROLLER_AGENT_REPOSITORY, API_KEY_GENERATOR as AGENT_CONTROLLER_API_KEY_GENERATOR } from './agent.controller';
 
 // Middleware and Guards
@@ -18,6 +18,12 @@ export {
   API_KEY_GENERATOR,
   type AuthenticatedRequest,
 } from './auth.middleware';
+export {
+  RateLimitGuard,
+  InMemoryRateLimitStore,
+  RATE_LIMIT_OPTIONS,
+  type RateLimitOptions,
+} from './rate-limit.middleware';
 
 // DTOs
 export {
@@ -28,6 +34,8 @@ export {
   LoginResponseDto,
   LogoutDto,
   LogoutResponseDto,
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
   // Actor DTOs
   ActorSummaryDto,
   // Agent DTOs
