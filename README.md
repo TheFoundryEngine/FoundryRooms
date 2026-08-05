@@ -12,17 +12,34 @@ FoundryRooms is a **community platform** for creators, educators, and membership
 
 ```
 FoundryRooms/
-├── apps/
-│   ├── frontend/         # Frontend application (feature-based)
-│   ├── backend/          # Backend modular monolith (DDD + hexagonal)
-│   └── worker/           # Async jobs and webhooks
-├── contracts/            # Shared API contracts and fixtures
-├── tests/                # Architecture, contract, integration, e2e tests
-├── docs/                 # Specs, governance, and ADRs
-└── scripts/              # Development and deployment scripts
+├── .github/
+│   ├── agents/            # Governor + team agent profiles
+│   ├── workflows/         # CI, governor review, auto-merge
+│   └── CODEOWNERS         # Advisory reviewer suggestions
+├── .husky/                # Git hooks (pre-commit, pre-push)
+├── src/                   # Backend app entrypoint (NestJS bootstrap)
+├── modules/               # Backend bounded contexts (modular monolith)
+│   ├── identity-access/   #   Domain → Application → Adapters → Contracts
+│   ├── community-structure/
+│   ├── engagement/
+│   ├── resources/
+│   ├── events/
+│   ├── commerce/
+│   ├── automation/
+│   ├── admin-reporting/
+│   └── .../
+├── contracts/             # Shared API contracts, events, fixtures, mocks
+├── design/                # Design system, tokens, UX specs (Team D)
+├── tests/                 # Architecture, contract, integration, e2e tests
+├── docs/                  # Specs, governance, and ADRs
+└── scripts/               # Dev and deployment scripts
 ```
 
-Backend bounded contexts are under `apps/backend/src/` with full hexagonal architecture (domain/application/adapters/contracts/tests). Frontend uses feature-based structure with components, layouts, and services.
+Each bounded context in `modules/` follows hexagonal architecture:
+- `domain/` — entities, value objects, domain events (framework-independent)
+- `application/` — use cases, ports, orchestration
+- `adapters/` — inbound (controllers), outbound (persistence, external APIs)
+- `contracts/` — external request/response shapes and event schemas
 
 ## Architecture
 
@@ -30,7 +47,7 @@ FoundryRooms is built as a **modular monolith** with:
 - **Domain-Driven Design** for bounded contexts
 - **Hexagonal architecture** separating domain from infrastructure
 - **Contract-first integration** for cross-context communication
-- **Governed delivery** with three parallel teams
+- **Governed delivery** with four delivery teams
 
 ### Bounded Contexts
 
@@ -44,6 +61,18 @@ FoundryRooms is built as a **modular monolith** with:
 - **Automation** - workflow rules and background jobs
 - **Admin & Reporting** - moderation and analytics
 
+### Boundary enforcement
+
+Architectural boundaries are enforced **deterministically**, not just by review:
+
+- **Architecture tests** (dependency-cruiser) — enforce cross-context isolation, hexagonal layering, domain framework independence, and contract purity. Run via `npm run arch:test`. Config in `.dependency-cruiser.js`.
+- **Pre-commit hook** — eslint + typecheck on staged files (runs automatically on every `git commit`)
+- **Pre-push hook** — unit tests + architecture tests + contract tests + build (runs automatically on every `git push`)
+- **CI pipeline** — full suite including integration tests (Postgres) and architecture tests
+- **Governor Agent** — LLM-based PR review for ADR compliance and boundary drift
+
+See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) §9.1 for the full rule set.
+
 ## Team Structure
 
 FoundryRooms uses a **flow model** — any developer can work on any bounded context. Architectural safety comes from the Governor Agent, CI checks, and architecture tests, not team silos.
@@ -51,8 +80,18 @@ FoundryRooms uses a **flow model** — any developer can work on any bounded con
 - **Bryan McKeon** (@TheFoundryEngine) — Governor / Architect
 - **Nick Flach** (@NickFlach) — Developer
 - **Matt Eckman** (@EckmanTechLLC) — Developer
+- **Neel** (@TBD-Neel) — Developer (Design & UX focus)
 
 Bounded contexts are **code boundaries** (enforced by architecture tests), not **team boundaries**. Any developer can pick up any Linear issue.
+
+### Delivery Team Focus Areas
+
+While any developer can work on any context, each team has a primary focus for ownership and ADR accountability:
+
+- **Team A (Community Core)** - Identity & Access + Community Structure
+- **Team B (Experience Layer)** - Engagement + Resources + frontend implementation
+- **Team C (Operations & Monetization)** - Events + Commerce + Automation + Admin
+- **Team D (Design & UX)** - Design system + UX flows + design tokens + accessibility; hands off design contracts to Team B for frontend implementation
 
 ## CI/CD Pipeline
 
@@ -110,21 +149,22 @@ The Governor Agent is an automated PR reviewer powered by OpenRouter's free LLM 
 ### How it works
 
 1. A PR is opened or updated targeting `main`
-2. The Governor Agent calls OpenRouter free models (fallback chain: Gemma, Nemotron, GPT-OSS, Cohere) to review the diff
+2. The Governor Agent calls OpenRouter free models (fallback chain) to review the diff
 3. The review is posted as a GitHub PR review with one of three verdicts:
-   - **APPROVED** — safe to merge, no blocking issues (green `governor-approved` label)
-   - **CHANGES REQUESTED** — lists what must change before merge (red `governor-rejected` label)
-   - **REJECTED** — explains rule violations (red `governor-rejected` label)
-4. If rejected, the linked Linear issue gets a `blocked` label and a comment with the rejection reason
-5. Auto-merge only fires when all CI checks pass, the Governor approves, and a human approves
+   - **APPROVED** — safe to merge, no blocking issues (`governor-approved` label)
+   - **CHANGES REQUESTED** — advisory concerns (cohesion, design alignment, non-blocking suggestions). Does **not** block merge. The team is notified via Linear. (`governor-changes-requested` label)
+   - **REJECTED** — hard rule violation (boundary breach, contract drift, missing tests). **Blocks merge.** (`governor-rejected` label)
+4. On REJECTED or CHANGES REQUESTED, the linked Linear issue gets a comment. REJECTED adds a `blocked` label; CHANGES REQUESTED adds a `governor-review` label.
+5. Auto-merge fires when all CI checks pass (including governor-review, which fails on REJECTED only) and a human approves
 
 ### PR labels
 
 | Label | Color | Meaning |
 |---|---|---|
 | `governor-approved` | Green | Governor Agent approved the PR |
-| `governor-rejected` | Red | Governor Agent rejected the PR — see review comment |
-| `governor-review-failed` | Yellow | All free models exhausted — manual review required |
+| `governor-changes-requested` | Yellow | Advisory concerns — PR can still merge, team notified via Linear |
+| `governor-rejected` | Red | Hard rule violation — PR is blocked from merge |
+| `governor-review-failed` | Gray | All free models exhausted — manual review required |
 
 ### Free model notes
 
@@ -170,18 +210,32 @@ See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for full
 ## Getting Started
 
 1. Clone the repository
-2. Set up your development environment
-3. Review the bounded context ownership in CODEOWNERS
-4. Read the development governance model
-5. Check ADRs for architectural constraints
+2. Run `npm install` — this also installs git hooks (husky) automatically
+3. Review the bounded context structure in `modules/` and the architecture rules in `.dependency-cruiser.js`
+4. Read the [development governance model](docs/governance/DEVELOPMENT_GOVERNANCE.md)
+5. Check [ADRs](docs/adr/ADR_INDEX.md) for architectural constraints
+
+### Local checks (run automatically by git hooks)
+
+| When | What runs | Command |
+|---|---|---|
+| `git commit` | eslint on staged files | `npx lint-staged` |
+| `git push` | unit tests + architecture tests + contract tests + build | `.husky/pre-push` |
+| Manual | architecture boundary tests only | `npm run arch:test` |
+| Manual | all unit tests | `npm test` |
+| Manual | lint the whole repo | `npm run lint` |
+| Manual | typecheck the whole repo | `npm run typecheck` |
+
+Do not bypass hooks with `--no-verify` — fix the issue instead. See [governance §12.1](docs/governance/DEVELOPMENT_GOVERNANCE.md) for details.
 
 ## Contributing
 
 All contributions must follow:
-- Bounded context ownership rules
+- Bounded context boundary rules (enforced by architecture tests)
 - Contract-first development
 - Required testing (unit, integration, contract, architecture)
 - ADR compliance for architectural changes
+- Pre-commit and pre-push hooks (do not bypass with `--no-verify`)
 
 See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for detailed rules.
 

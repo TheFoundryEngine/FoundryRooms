@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines how FoundryRooms work is separated across the Governor Agent and the three human-developer teams during the foundation and early feature stages.
+This document defines how FoundryRooms work is separated across the Governor Agent and the four delivery teams during the foundation and early feature stages.
 
 It answers:
 - who owns what
@@ -24,12 +24,12 @@ This document is an execution and delivery map. It should be read alongside:
 
 FoundryRooms starts with:
 - **1 Governor Agent** controlling architectural integrity on `main`
-- **3 Human Developers**
-- **3 Feature Agents**, one paired with each human developer
+- **4 Human Developers**
+- **4 Feature Agents**, one paired with each human developer
 
 The Governor Agent is responsible for creating and protecting the shared foundation.
 
-The three delivery teams are responsible for building within bounded contexts, using agreed contracts, fixtures, and ADR rules so that work can proceed in parallel without uncontrolled coupling.
+The four delivery teams are responsible for building within bounded contexts, using agreed contracts, fixtures, and ADR rules so that work can proceed in parallel without uncontrolled coupling.
 
 ---
 
@@ -104,6 +104,7 @@ This means:
 ### Teams most affected by Team A
 - Team B for member-facing experiences and visibility rules
 - Team C for entitlements, billing, gated events, and admin controls
+- Team D for identity and community structure UX/design handoff
 
 ---
 
@@ -134,6 +135,7 @@ This means:
 ### Teams most affected by Team B
 - Team A for identity and visibility dependencies
 - Team C where event/activity feeds and automated notices intersect
+- Team D for consuming design contracts and feeding back implementation constraints
 
 ---
 
@@ -165,6 +167,40 @@ This means:
 ### Teams most affected by Team C
 - Team A for identity and entitlement enforcement
 - Team B for event display, engagement tie-ins, and notification/read model consumption
+- Team D for event, commerce, and admin reporting UX/design handoff
+
+---
+
+## 4.5 Team D — Design & UX
+
+**Human Developer D + Agent D**
+
+### Owns
+- Design system and component library specifications
+- UX flows, wireframes, and interaction specs
+- Design tokens (color, spacing, typography, motion)
+- Accessibility and visual consistency standards
+- Design handoff contracts consumed by Team B
+
+### Deliverables
+- design system source in `design/`
+- component specs and token definitions
+- UX flow and interaction specs for owned surfaces
+- accessibility notes and conformance targets
+- design contracts, fixtures, and handoff artifacts for Team B consumption
+
+### Critical boundary surfaces exposed to others
+- design tokens and component specs (consumed by Team B for frontend implementation)
+- UX flow and interaction specs (consumed by Team B and reviewed by Governor for contract alignment)
+- accessibility conformance targets (cross-cutting; all teams must meet)
+
+### Teams most affected by Team D
+- Team B for frontend implementation against approved design contracts
+- Team A, Team C for UX/design handoff on identity, community, events, commerce, and admin surfaces
+
+### Does not own
+- `apps/frontend/` production implementation (owned by Team B)
+- backend bounded contexts or persistence
 
 ---
 
@@ -181,6 +217,9 @@ This means:
 | Automation | Team C | Team A, Team B | Trigger and side-effect rules must follow global integration ADRs |
 | Notification read models | Team B | Team C | Delivery mechanics later may span Team C handlers |
 | Admin & Reporting foundations | Team C | Team A, Team B | Cross-domain read models must not create domain write coupling |
+| Design system & tokens | Team D | Team B, Team A, Team C | Team B implements frontend against approved design contracts |
+| UX flows & interaction specs | Team D | Team B, Team A, Team C | Consumed as design contracts; Team B implements, others review for their surfaces |
+| Accessibility standards | Team D | All teams | Cross-cutting; all teams must meet conformance targets |
 | Global contracts / shared rules | Governor Agent | All teams | Enforced through ADRs and PR checks |
 
 ---
@@ -261,7 +300,7 @@ Team A should first establish:
 
 This work is foundational because other teams depend on these surfaces conceptually, even if they do not wait for full implementation.
 
-## 7.2 Team B and Team C start in parallel once Team A contracts are agreed
+## 7.2 Team B, Team C, and Team D start in parallel once Team A contracts are agreed
 
 ### Team B can proceed with
 - discussion and feed UI skeletons
@@ -275,7 +314,14 @@ This work is foundational because other teams depend on these surfaces conceptua
 - worker process setup for owned job flows
 - automation triggers and internal event contracts
 
-Important: Team B and Team C should not wait for Team A runtime completion once contracts and fixtures are approved.
+### Team D can proceed with
+- design system foundation (tokens, base components, typography, color)
+- UX flow specs for identity, community, engagement, and events surfaces
+- accessibility conformance targets and baseline patterns
+- design handoff contracts for Team B consumption
+
+Important: Team B, Team C, and Team D should not wait for Team A runtime completion once contracts and fixtures are approved.
+Team B should not wait for Team D design completion once design contracts (tokens, component specs) are approved — Team B implements against approved design contracts using placeholder/mock UI where detailed designs are not yet final.
 
 ---
 
@@ -304,6 +350,22 @@ If a team needs a new cross-context field or behavior, it must raise:
 
 ### Rule 4
 No team may directly read or write another team’s persistence model just to move faster.
+
+### Rule 5 — Mock ownership
+When a contract is new or changing, the **consuming team** produces mocks and fixtures from the approved contract.
+The owning team owns the contract definition; the consuming team owns the mock that lets it proceed without waiting.
+If the two diverge, the contract test fails and the owning team updates the contract or the consuming team updates the mock — but neither blocks the other from proceeding against the approved shape.
+
+### Rule 6 — Design contract parallel delivery
+Team B implements frontend against approved Team D design contracts (tokens, component specs, UX flows) the same way it implements against approved API contracts.
+If a design contract is not yet final, Team B proceeds using placeholder/mock UI against the approved token and layout baseline.
+Team B does not block on Team D detailed design completion once the baseline design contract is approved.
+
+### Rule 7 — Contested contract escalation
+If two teams disagree on what a shared contract should be, the disagreement must be raised as a Linear issue immediately, not stalled in PR comments.
+The Governor Agent is the named decider for contract disputes.
+SLA: the Governor must triage the dispute within 2 business days and either rule, request an ADR, or escalate to architecture leadership.
+No team may silently block another by leaving a contract dispute unresolved in review.
 
 ---
 
@@ -420,6 +482,7 @@ The Governor Agent should ensure that later ADRs do not contradict earlier accep
 ## Team B
 - build frontend route shells and feature layout for engagement/resources
 - consume Team A contracts via mocks and fixtures
+- consume Team D design contracts (tokens, component specs) for frontend implementation
 - define engagement read/write contracts in owned domains
 - establish frontend state and composable patterns
 
@@ -428,6 +491,12 @@ The Governor Agent should ensure that later ADRs do not contradict earlier accep
 - define worker-owned job boundaries
 - define automation trigger/event contracts
 - create entitlement and event fixtures for downstream consumption
+
+## Team D
+- establish design system foundation (tokens, base components, typography, color)
+- create UX flow specs for identity, community, engagement, and events surfaces
+- define accessibility conformance targets and baseline patterns
+- produce design handoff contracts for Team B consumption
 
 ---
 
@@ -442,6 +511,16 @@ Parallel feature implementation should only begin once all of the following are 
 - CI placeholder checks exist
 - module template examples exist
 - no unresolved argument remains over top-level architecture or boundaries
+
+### Living gate rule
+This gate is not a one-time check. It applies whenever a new capability area or new team is introduced (for example, Team D and the `design/` surface).
+Before the new team begins merging to `main`, the Governor must confirm:
+- the new team's ownership and ADR bucket are documented
+- the new team's contracts and boundary surfaces are identified
+- fixture and mock rules cover the new surface
+- CODEOWNERS and this document reflect the new team
+
+If the gate is not re-met, the new team's PRs should be treated as cross-context changes requiring Governor review, not routine feature merges.
 
 ---
 

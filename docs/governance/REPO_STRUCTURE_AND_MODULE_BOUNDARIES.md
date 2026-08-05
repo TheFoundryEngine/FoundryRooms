@@ -53,6 +53,7 @@ This means the repo structure should be **technology-neutral where possible**, b
 │   ├── web/                # frontend application
 │   ├── api/                # backend modular monolith entrypoint
 │   └── worker/             # async jobs, webhooks, notifications (if separated logically)
+├── design/                 # design system source, tokens, component specs, UX flows (Team D)
 ├── modules/
 │   ├── identity-access/
 │   ├── community-structure/
@@ -183,7 +184,7 @@ apps/web/
 
 ---
 
-## How the three teams should work in this structure
+## How the four teams should work in this structure
 
 ### Team A — Community Core
 Primary ownership:
@@ -196,6 +197,7 @@ Primary ownership:
 - `modules/engagement/`
 - `modules/resources/`
 - major parts of `apps/web/` for member-facing experience
+- consumes Team D design contracts for frontend implementation
 
 ### Team C — Operations & Monetization
 Primary ownership:
@@ -204,6 +206,11 @@ Primary ownership:
 - `modules/automation/`
 - `modules/admin-reporting/`
 - worker/webhook/job surfaces where applicable
+
+### Team D — Design & UX
+Primary ownership:
+- `design/` — design system source, tokens, component specs, UX flows, accessibility standards
+- does not own `apps/web/` production implementation (Team B implements against approved design contracts)
 
 Cross-team work must happen through contracts, not hidden direct dependencies.
 

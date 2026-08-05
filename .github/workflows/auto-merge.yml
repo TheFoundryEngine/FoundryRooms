@@ -119,8 +119,9 @@ jobs:
 
             let actions = [];
             if (!checksPassed) actions.push('Check the [Actions tab](${pr.html_url}/checks) for any failed checks');
-            if (!checksPassed) actions.push('Read the Governor Agent review comment for any architectural issues');
-            if (!checksPassed) actions.push('Fix any issues and push to this branch — checks will re-run automatically');
+            if (!checksPassed) actions.push('If the Governor Agent posted a REJECTED review, fix the hard-rule violations before merge');
+            if (!checksPassed) actions.push('If the Governor Agent posted CHANGES REQUESTED, the PR is not blocked — address the advisory concerns in a follow-up');
+            if (!checksPassed) actions.push('Fix any failing checks and push to this branch — checks will re-run automatically');
             if (!hasApproval) actions.push('Request a review from a team member');
             actions.push('Once all checks pass and a human approves, the PR will auto-merge');
 

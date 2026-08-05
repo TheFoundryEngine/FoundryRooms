@@ -101,7 +101,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - run: echo "Architecture tests — implement with dependency-cruiser or custom import guards"
+      - run: npm run arch:test
 
   build:
     name: build

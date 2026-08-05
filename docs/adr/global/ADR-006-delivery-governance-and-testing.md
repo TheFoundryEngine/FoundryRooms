@@ -7,7 +7,7 @@
 
 ## Context
 
-The project uses three human developers with paired agents and a governor-controlled `main` branch. Previous projects suffered from architecture drift, weak boundaries, mock divergence, and abstraction-heavy code that hid control flow and ownership.
+The project uses four human developers with paired agents and a governor-controlled `main` branch. Previous projects suffered from architecture drift, weak boundaries, mock divergence, and abstraction-heavy code that hid control flow and ownership.
 
 ## Decision
 

@@ -27,10 +27,13 @@ ${DIFF}
 
 == Instructions ==
 
-Review this PR against your checklist. Be concise and specific. End your review with one of:
+Review this PR against your checklist. Be concise and specific. End your review with exactly one of:
 - APPROVED -- safe to merge, no blocking issues
-- CHANGES REQUESTED -- list what must change before merge
-- REJECTED -- explain what violated the rules and what must change"
+- CHANGES REQUESTED -- advisory concerns (cohesion, design alignment, non-blocking suggestions); the team is notified via Linear but the PR is NOT blocked
+- REJECTED -- hard rule violation (boundary breach, contract drift, missing tests, undocumented architecture change); the PR IS blocked from merge
+
+Use CHANGES REQUESTED for concerns that should be tracked but do not warrant blocking the merge.
+Use REJECTED only for hard rule violations."
 
 # Free model fallback chain — ordered by capability
 # Check available free models: curl -s https://openrouter.ai/api/v1/models | jq -r '.data[] | select(.id | test(":free$")) | .id'
@@ -92,7 +95,24 @@ echo "review<<EOF" >> "$GITHUB_OUTPUT"
 echo "$REVIEW" >> "$GITHUB_OUTPUT"
 echo "EOF" >> "$GITHUB_OUTPUT"
 
+# Determine verdict for the workflow
+VERDICT="unknown"
+if echo "$REVIEW" | grep -qi "APPROVED"; then
+  VERDICT="approved"
+elif echo "$REVIEW" | grep -qi "CHANGES REQUESTED"; then
+  VERDICT="changes-requested"
+elif echo "$REVIEW" | grep -qi "REJECTED"; then
+  VERDICT="rejected"
+fi
+echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+
+# Only REJECTED blocks the merge (exit 1 fails the check).
+# CHANGES REQUESTED is advisory — the check passes, Linear is notified, PR can merge.
 if echo "$REVIEW" | grep -q "REJECTED"; then
   echo "Governor Agent rejected this PR. See PR comment for details."
   exit 1
+fi
+
+if [ "$VERDICT" = "changes-requested" ]; then
+  echo "Governor Agent flagged advisory changes. PR is not blocked. Linear will be notified."
 fi

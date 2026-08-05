@@ -7,7 +7,7 @@
 
 ## Context
 
-FoundryRooms needs a context map that allows three delivery teams to work in parallel with minimal blocking while preserving strong cohesion and low coupling.
+FoundryRooms needs a context map that allows four delivery teams to work in parallel with minimal blocking while preserving strong cohesion and low coupling.
 
 The product goal is a community platform first, not a collaborative coding runtime.
 
@@ -44,6 +44,16 @@ Owns:
 - Commerce
 - Automation
 - Admin & Reporting foundations
+
+### Team D — Design & UX
+Owns:
+- Design system and component library specifications
+- UX flows, wireframes, and interaction specs
+- Design tokens (color, spacing, typography, motion)
+- Accessibility and visual consistency standards
+- Design handoff contracts consumed by Team B
+
+Team D produces design artifacts as consumable contracts in `design/`, not production app code. Team B implements frontend against approved design contracts.
 
 ## Dependency rules
 
