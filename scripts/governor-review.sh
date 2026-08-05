@@ -33,12 +33,14 @@ Review this PR against your checklist. Be concise and specific. End your review 
 - REJECTED -- explain what violated the rules and what must change"
 
 # Free model fallback chain — ordered by capability
-# Avoid openrouter/free (auto-selects unsuitable models like content safety classifiers)
+# Check available free models: curl -s https://openrouter.ai/api/v1/models | jq -r '.data[] | select(.id | test(":free$")) | .id'
 FREE_MODELS=(
-  "meta-llama/llama-3.3-70b-instruct:free"
-  "google/gemini-2.0-flash-exp:free"
-  "qwen/qwen-2.5-72b-instruct:free"
-  "mistralai/mistral-7b-instruct:free"
+  "google/gemma-4-31b-it:free"
+  "nvidia/nemotron-3-super-120b-a12b:free"
+  "openai/gpt-oss-20b:free"
+  "cohere/north-mini-code:free"
+  "google/gemma-4-26b-a4b-it:free"
+  "nvidia/nemotron-3-nano-30b-a3b:free"
 )
 
 REVIEW=""
