@@ -36,19 +36,20 @@ PAYLOAD=$(jq -n \
   --arg system "$SYSTEM_PROMPT" \
   --arg user "$USER_MESSAGE" \
   '{
-    model: "claude-opus-4-5",
+    model: "openrouter/free",
     max_tokens: 1024,
-    messages: [{ role: "user", content: $user }],
-    system: $system
+    messages: [
+      { role: "system", content: $system },
+      { role: "user", content: $user }
+    ]
   }')
 
-RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
-  -H "x-api-key: ${ANTHROPIC_API_KEY}" \
-  -H "anthropic-version: 2023-06-01" \
+RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
+  -H "Authorization: Bearer ${LLM_API_KEY}" \
   -H "content-type: application/json" \
   -d "$PAYLOAD")
 
-REVIEW=$(echo "$RESPONSE" | jq -r '.content[0].text // "Governor Agent review failed -- check workflow logs."')
+REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "Governor Agent review failed -- check workflow logs."')
 
 echo "review<<EOF" >> "$GITHUB_OUTPUT"
 echo "$REVIEW" >> "$GITHUB_OUTPUT"

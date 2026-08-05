@@ -56,7 +56,7 @@ Go to repo → Settings → Secrets and variables → Actions:
 | Secret | Purpose | Required |
 |---|---|---|
 | `DATABASE_URL` | Neon connection string (migrations + deploy workflow) | Yes |
-| `ANTHROPIC_API_KEY` | Governor Agent PR review workflow | Yes |
+| `LLM_API_KEY` | OpenRouter API key for Governor Agent PR review (free tier) | Yes |
 | `RENDER_DEPLOY_HOOK_URL` | Manual deploy trigger (optional — Render auto-deploys) | No |
 
 ---
@@ -133,6 +133,39 @@ DATABASE_URL="postgres://..." npm run start:dev
 | GET | `/api/v1/agents/:id` | Get agent details (requires auth) |
 | POST | `/api/v1/agents/:id/rotate-key` | Rotate API key (requires auth) |
 | DELETE | `/api/v1/agents/:id` | Deactivate agent (requires auth) |
+
+## Governor Agent (PR Review)
+
+The Governor Agent reviews every PR automatically using OpenRouter's free LLM models.
+
+### How it works
+1. PR opened → `governor-review.yml` workflow triggers
+2. Script sends PR diff + governor prompt to OpenRouter (`openrouter/free` model)
+3. Review posted as PR comment
+4. If review says "REJECTED", the check fails and blocks merge
+5. `auto-merge.yml` waits for all checks + approval, then squash-merges
+
+### Setup (free, $0 cost)
+1. Go to [openrouter.ai](https://openrouter.ai) and sign up
+2. Generate an API key
+3. Add it as a GitHub repository secret: `LLM_API_KEY`
+4. That's it — the workflow uses `openrouter/free` which auto-selects free models
+
+### Cost
+- **OpenRouter free models**: $0 (rate-limited, models rotate)
+- **GitHub Actions minutes**: $0 for public repos (unlimited)
+- **Total**: $0
+
+### Limitations
+- Free models are less capable than paid models (e.g. Claude Opus)
+- Rate limits may cause occasional review failures
+- Model quality varies as OpenRouter rotates available free models
+
+### Upgrading later
+To use a better model, update the `model` field in `scripts/governor-review.sh`:
+- `openrouter/free` → free (current)
+- `anthropic/claude-3.5-sonnet` → paid, better reasoning
+- `openai/gpt-4o` → paid, alternative
 
 ## Security Notes
 

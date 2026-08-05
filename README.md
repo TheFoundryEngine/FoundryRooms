@@ -126,7 +126,7 @@ See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for full
 
 - [Product & Architecture Spec](docs/spec/HIGH_LEVEL_SPEC.md)
 - [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md)
-- [Architecture Decision Records](docs/adr/)
+- [ADR Index](docs/adr/ADR_INDEX.md) — all ADRs with numbering rules
 - [Agent Operating Rules](AGENTS.md)
 - [Infrastructure & CI/CD Setup](docs/INFRASTRUCTURE_SETUP.md)
 

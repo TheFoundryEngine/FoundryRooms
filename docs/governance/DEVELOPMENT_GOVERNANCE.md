@@ -202,6 +202,9 @@ Linear is connected via MCP server (`https://mcp.linear.app/mcp`) to the IDE, al
 
 ## 6. ADR Governance Model
 
+All ADRs are tracked in a single index: [`docs/adr/ADR_INDEX.md`](../adr/ADR_INDEX.md).
+When creating a new ADR, check the index for the next available number and add a row in the same PR.
+
 ## 6.1 Global ADRs
 Location:
 - `docs/adr/global/`
