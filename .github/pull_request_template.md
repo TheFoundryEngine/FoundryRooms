@@ -9,9 +9,16 @@
 - Contract reference(s):
 
 ## Context Ownership
-- [ ] Team A — Community Core
-- [ ] Team B — Experience Layer
-- [ ] Team C — Operations & Monetization
+- [ ] Identity & Access
+- [ ] Community Structure
+- [ ] Engagement
+- [ ] Resources
+- [ ] Events
+- [ ] Commerce
+- [ ] Notifications
+- [ ] Automation
+- [ ] Admin & Reporting
+- [ ] Shared platform / repo governance
 - [ ] Cross-context change
 
 ## Change Type
@@ -23,18 +30,6 @@
 - [ ] Test-only
 - [ ] Documentation
 - [ ] CI/CD / tooling
-
-## Bounded Contexts Touched
-- [ ] Identity & Access
-- [ ] Community Structure
-- [ ] Engagement
-- [ ] Resources
-- [ ] Events
-- [ ] Commerce
-- [ ] Notifications
-- [ ] Automation
-- [ ] Admin & Reporting
-- [ ] Shared platform / repo governance
 
 ## Contract and Boundary Checklist
 - [ ] This change stays within one bounded context, **or** all cross-context interactions use approved contracts

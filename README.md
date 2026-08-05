@@ -46,9 +46,13 @@ FoundryRooms is built as a **modular monolith** with:
 
 ## Team Structure
 
-- **Team A (Community Core)** - Identity & Access + Community Structure
-- **Team B (Experience Layer)** - Engagement + Resources + member-facing contracts
-- **Team C (Operations & Monetization)** - Events + Commerce + Automation + Admin
+FoundryRooms uses a **flow model** — any developer can work on any bounded context. Architectural safety comes from the Governor Agent, CI checks, and architecture tests, not team silos.
+
+- **Bryan McKeon** (@TheFoundryEngine) — Governor / Architect
+- **Nick Flach** (@NickFlach) — Developer
+- **Matt Eckman** (@EckmanTechLLC) — Developer
+
+Bounded contexts are **code boundaries** (enforced by architecture tests), not **team boundaries**. Any developer can pick up any Linear issue.
 
 ## CI/CD Pipeline
 

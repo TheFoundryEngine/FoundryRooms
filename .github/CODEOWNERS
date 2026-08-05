@@ -1,30 +1,34 @@
-# FoundryRooms CODEOWNERS (template)
+# FoundryRooms CODEOWNERS — Flow Model
 #
-# Governor / Architect:        @TheFoundryEngine (Bryan)
-# Team A — Community Core:     @NickFlach (Nick)
-# Team C — Ops & Monetization: @EckmanTechLLC (Matt)
-# Team B — Experience:         @bryanyMac (Bryan)
+# All developers can work on any context.
+# Architectural safety comes from:
+#   1. Governor Agent (automated ADR + boundary enforcement)
+#   2. CI pipeline (contract tests, architecture tests)
+#   3. Human review (at least 1 approval from any developer)
+#   4. Bounded contexts in code (modular monolith, no cross-context imports)
 #
-# GitHub uses the CODEOWNERS file from the base branch of the pull request.
-# Keep paths case-correct.
+# Developers:
+#   @TheFoundryEngine  (Bryan)  — Governor / Architect
+#   @NickFlach         (Nick)   — Developer
+#   @EckmanTechLLC     (Matt)   — Developer
+#   @bryanyMac         (Bryan)  — Developer
+#
+# CODEOWNERS is advisory — it suggests reviewers but does not gate PRs by team.
+# GitHub branch protection should require 1 review from anyone, not per-team.
 
 # -----------------------------
-# Default ownership
+# Default — all developers notified on all changes
 # -----------------------------
-*                                           @TheFoundryEngine
+*                                           @TheFoundryEngine @NickFlach @EckmanTechLLC @bryanyMac
 
 # -----------------------------
-# Source of truth docs
+# Governance & architecture — Bryan as architect
 # -----------------------------
 /AGENTS.md                                   @TheFoundryEngine
 /docs/spec/                                  @TheFoundryEngine
 /docs/governance/                            @TheFoundryEngine
 /docs/adr/global/                            @TheFoundryEngine
-/docs/adr/features/                          @TheFoundryEngine
-
-# -----------------------------
-# GitHub agent / workflow adapter files
-# -----------------------------
+/docs/adr/ADR_INDEX.md                       @TheFoundryEngine
 /.github/agents/                             @TheFoundryEngine
 /.github/instructions/                       @TheFoundryEngine
 /.github/workflows/                          @TheFoundryEngine
@@ -32,65 +36,7 @@
 /.github/pull_request_template.md            @TheFoundryEngine
 
 # -----------------------------
-# Team A — Community Core
-# Identity & Access + Community Structure
-# -----------------------------
-/apps/backend/src/identity-access/           @NickFlach @TheFoundryEngine
-/apps/backend/src/community-structure/       @NickFlach @TheFoundryEngine
-/contracts/api/identity-access/              @NickFlach @TheFoundryEngine
-/contracts/api/community-structure/          @NickFlach @TheFoundryEngine
-/contracts/events/identity-access/           @NickFlach @TheFoundryEngine
-/contracts/events/community-structure/       @NickFlach @TheFoundryEngine
-/tests/contract/identity-access/             @NickFlach @TheFoundryEngine
-/tests/contract/community-structure/         @NickFlach @TheFoundryEngine
-/tests/integration/identity-access/          @NickFlach @TheFoundryEngine
-/tests/integration/community-structure/      @NickFlach @TheFoundryEngine
-
-# -----------------------------
-# Team B — Experience
-# Engagement + Resources + member-facing frontend surfaces
-# -----------------------------
-/apps/backend/src/engagement/                @bryanyMac @TheFoundryEngine
-/apps/backend/src/resources/                 @bryanyMac @TheFoundryEngine
-/apps/frontend/                              @bryanyMac @TheFoundryEngine
-/contracts/api/engagement/                   @bryanyMac @TheFoundryEngine
-/contracts/api/resources/                    @bryanyMac @TheFoundryEngine
-/contracts/events/engagement/                @bryanyMac @TheFoundryEngine
-/contracts/events/resources/                 @bryanyMac @TheFoundryEngine
-/tests/contract/engagement/                  @bryanyMac @TheFoundryEngine
-/tests/contract/resources/                   @bryanyMac @TheFoundryEngine
-/tests/integration/engagement/               @bryanyMac @TheFoundryEngine
-/tests/integration/resources/                @bryanyMac @TheFoundryEngine
-
-
-# -----------------------------
-# Team C — Ops & Monetization
-# Events + Commerce + Automation + Admin foundations + worker surfaces
-# -----------------------------
-/apps/backend/src/events/                    @EckmanTechLLC @TheFoundryEngine
-/apps/backend/src/commerce/                  @EckmanTechLLC @TheFoundryEngine
-/apps/backend/src/automation/                @EckmanTechLLC @TheFoundryEngine
-/apps/backend/src/admin-reporting/           @EckmanTechLLC @TheFoundryEngine
-/apps/worker/                                @EckmanTechLLC @TheFoundryEngine
-/contracts/api/events/                       @EckmanTechLLC @TheFoundryEngine
-/contracts/api/commerce/                     @EckmanTechLLC @TheFoundryEngine
-/contracts/api/automation/                   @EckmanTechLLC @TheFoundryEngine
-/contracts/api/admin-reporting/              @EckmanTechLLC @TheFoundryEngine
-/contracts/events/events/                    @EckmanTechLLC @TheFoundryEngine
-/contracts/events/commerce/                  @EckmanTechLLC @TheFoundryEngine
-/contracts/events/automation/                @EckmanTechLLC @TheFoundryEngine
-/contracts/events/admin-reporting/           @EckmanTechLLC @TheFoundryEngine
-/tests/contract/events/                      @EckmanTechLLC @TheFoundryEngine
-/tests/contract/commerce/                    @EckmanTechLLC @TheFoundryEngine
-/tests/contract/automation/                  @EckmanTechLLC @TheFoundryEngine
-/tests/contract/admin-reporting/             @EckmanTechLLC @TheFoundryEngine
-/tests/integration/events/                   @EckmanTechLLC @TheFoundryEngine
-/tests/integration/commerce/                 @EckmanTechLLC @TheFoundryEngine
-/tests/integration/automation/               @EckmanTechLLC @TheFoundryEngine
-/tests/integration/admin-reporting/          @EckmanTechLLC @TheFoundryEngine
-
-# -----------------------------
-# Shared contracts and architecture safety nets
+# Shared infrastructure — Bryan as architect
 # -----------------------------
 /contracts/fixtures/                         @TheFoundryEngine
 /contracts/mocks/                            @TheFoundryEngine
@@ -100,10 +46,6 @@
 /db/schema/                                  @TheFoundryEngine
 /scripts/                                    @TheFoundryEngine
 /tools/                                      @TheFoundryEngine
-
-# -----------------------------
-# Shared backend composition surfaces
-# -----------------------------
-/apps/backend/src/bootstrap/                @TheFoundryEngine
-/apps/backend/src/shared/                   @TheFoundryEngine
-/apps/backend/src/notifications/            @TheFoundryEngine
+/apps/backend/src/bootstrap/                 @TheFoundryEngine
+/apps/backend/src/shared/                    @TheFoundryEngine
+/apps/backend/src/notifications/             @TheFoundryEngine

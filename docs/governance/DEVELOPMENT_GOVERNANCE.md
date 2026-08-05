@@ -1,4 +1,4 @@
-# FoundryRooms — Development, Governance & Repository Setup v0.3
+# FoundryRooms — Development, Governance & Repository Setup v0.4
 
 ## 1. Purpose
 
@@ -27,14 +27,23 @@ GitHub-specific agent files are implementation adapters for this governance mode
 
 ## 2. Delivery Model
 
-FoundryRooms uses a **governed human-agent model**.
+FoundryRooms uses a **governed flow model**.
 
 ### Core structure
 - **1 Governor Agent** oversees conformance into `main`
-- **3 Human Developers** each own major bounded contexts
-- **3 Feature Agents** pair with the three human developers
+- **3 Human Developers** can work on any bounded context
+- **Feature Agents** pair with developers as needed
 
-The governor is not a replacement for architecture or human judgment. The governor exists to enforce rules, preserve coherence, and stop drift.
+### Flow principles
+- Any developer can pick up any Linear issue, regardless of bounded context
+- Architectural safety comes from automated enforcement, not team silos:
+  1. **Governor Agent** — automated ADR compliance and boundary checking on every PR
+  2. **CI pipeline** — contract tests, architecture tests, lint, typecheck, build
+  3. **Human review** — at least 1 approval from any developer
+  4. **Bounded contexts in code** — modular monolith with architecture tests preventing cross-context imports
+- Bounded contexts are **code boundaries**, not **team boundaries**
+- Developers are encouraged to work across contexts to maximize flow and reduce bottlenecks
+- The governor is not a replacement for architecture or human judgment. The governor exists to enforce rules, preserve coherence, and stop drift.
 
 ---
 
@@ -62,53 +71,36 @@ Protect the integrity of `main`.
 - documented decisions over ad hoc changes
 - tests and contracts over assumption
 
-## 3.2 Team A — Community Core
+## 3.2 Developers
 
-**Human Developer A + Agent A**
+All developers can work on any bounded context. There are no team silos.
 
-Owns:
-- Identity & Access
-- Community Structure
+**Bryan McKeon** (@TheFoundryEngine) — Governor / Architect
+- Final authority on ADRs and architectural decisions
+- Maintains governance docs, global ADRs, and shared infrastructure
+- Can approve any PR
 
-Responsible for:
-- membership, roles, permissions, access groups
-- invitation and onboarding flows
-- community, space, and channel hierarchy
-- policy and authorization boundaries
-- ADRs within these contexts
+**Nick Flach** (@NickFlach) — Developer
+- Can pick up any Linear issue across any bounded context
 
-## 3.3 Team B — Experience Layer
+**Matt Eckman** (@EckmanTechLLC) — Developer
+- Can pick up any Linear issue across any bounded context
 
-**Human Developer B + Agent B**
+### Bounded contexts (code boundaries, not team boundaries)
 
-Owns:
-- Engagement
-- Resources
-- member-facing notification read models and UI contracts
+| Context | Purpose |
+|---|---|
+| Identity & Access | authentication, roles, permissions |
+| Community Structure | communities, spaces, channels |
+| Engagement | posts, threads, reactions, feeds |
+| Resources | documents and content management |
+| Events | event creation, RSVP, attendance |
+| Commerce | memberships, payments, entitlements |
+| Notifications | in-app and email notifications |
+| Automation | workflow rules and background jobs |
+| Admin & Reporting | moderation and analytics |
 
-Responsible for:
-- posts, comments, reactions, feed experience
-- resource and document surfaces
-- unread states
-- member-facing API contracts and fixtures in owned areas
-- ADRs within these contexts
-
-## 3.4 Team C — Operations & Monetization
-
-**Human Developer C + Agent C**
-
-Owns:
-- Events
-- Commerce
-- Automation
-- Admin & Reporting foundations
-
-Responsible for:
-- events and attendance
-- purchases, subscriptions, entitlements
-- automation handlers and jobs
-- audit and admin reporting foundations
-- ADRs within these contexts
+Any developer may work in any context. The Governor Agent and architecture tests enforce boundaries — not team assignments.
 
 ---
 
@@ -186,9 +178,11 @@ Dev effort identified
 ### Linear Project Structure
 
 - Each major initiative gets its own Linear project
-- Issues are tagged by team (Team A, B, C) and bounded context
+- Issues are tagged by bounded context (not by team)
+- Issues are assigned to any available developer — not by team
 - ADRs are referenced in issue descriptions
 - GitHub PRs auto-link to Linear issues via `FRA-XX` references in PR titles/descriptions
+- When the Governor Agent rejects a PR, the linked Linear issue gets a `blocked` label and a comment with the rejection reason
 
 ### MCP Integration
 
@@ -241,7 +235,7 @@ Any material architecture decision must be documented before or alongside the co
 ## 7. Pull Request Workflow
 
 ## 7.1 Before work starts
-A team must identify:
+A developer must identify:
 - bounded context affected
 - deliverable
 - whether an ADR is required
@@ -340,7 +334,7 @@ This includes:
 - frontend DTO expectations
 
 ### 8.2 A contract owner must be named
-Every contract must have one owning team.
+Every contract must have one owning context (not team). The context that produces the data owns the contract.
 
 ### 8.3 Contract changes are not local-only
 If a contract changes, the PR must update:
@@ -351,7 +345,7 @@ If a contract changes, the PR must update:
 - consuming integration points
 
 ### 8.4 Parallel delivery rule
-If one team is blocked by a not-yet-implemented dependency, it proceeds using:
+If a developer is blocked by a not-yet-implemented dependency, they proceed using:
 - the approved contract
 - mocks generated from that contract
 - failing or pending contract tests where appropriate
@@ -363,16 +357,14 @@ Mock data that diverges from agreed contracts is a defect, not a convenience.
 
 ## 9. Code Ownership & Boundaries
 
-Use `CODEOWNERS` to reflect bounded-context ownership.
+`CODEOWNERS` is **advisory** — it suggests reviewers but does not gate PRs by team. All developers are notified on all changes by default. Governance and shared infrastructure paths require the architect's review.
 
-Examples:
-- `/src/identity-access/` → Team A
-- `/src/community-structure/` → Team A
-- `/src/engagement/` → Team B
-- `/src/resources/` → Team B
-- `/src/events/` → Team C
-- `/src/commerce/` → Team C
-- `/src/automation/` → Team C
+### Boundary enforcement (automated)
+Architectural boundaries are enforced by:
+1. **Governor Agent** — rejects PRs with cross-context coupling, missing ADRs, or contract drift
+2. **Architecture tests** — fail on forbidden imports, layer violations, or cross-context persistence access
+3. **Contract tests** — fail on schema/payload drift between contexts
+4. **Human review** — any developer can flag concerns during review
 
 ### Boundary rules
 - no cross-context imports without an approved interface
@@ -481,7 +473,7 @@ A passing branch is not enough. A PR must be safe to merge into current `main`.
 
 Architecture drift is expected unless actively controlled.
 
-### Governor and team responsibilities
+### Governor and developer responsibilities
 - review dependency growth
 - detect repeated boundary leaks
 - identify stale abstractions
@@ -526,10 +518,7 @@ This is optional. FoundryRooms does **not** require developers to use GitHub Cop
 
 The repo should begin with:
 - `AGENTS.md` — vendor-neutral operating rules for all agents
-- `.github/agents/governor.agent.md` — governor profile for GitHub-hosted agent flows if used
-- `.github/agents/team-a-community-core.agent.md`
-- `.github/agents/team-b-experience.agent.md`
-- `.github/agents/team-c-ops-monetization.agent.md`
+- `.github/agents/governor.agent.md` — governor profile for automated PR review
 - `.github/instructions/github-agent-platform.instructions.md` — optional GitHub-platform-specific guidance
 
 If GitHub’s agent platform requires repository instruction files such as `.github/copilot-instructions.md`, treat them as platform adapters rather than the governing source of truth.
@@ -540,8 +529,8 @@ If GitHub’s agent platform requires repository instruction files such as `.git
 
 ### Branch protection
 - require pull request before merge
-- require code owner review
-- require passing status checks
+- require at least 1 human approval (from any developer)
+- require passing status checks (CI + Governor Agent Review)
 - block force pushes
 - block deletion of protected branch
 
