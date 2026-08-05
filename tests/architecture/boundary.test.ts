@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { cruise } from 'dependency-cruiser';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// @ts-expect-error — .dependency-cruiser.js is a JS config file with no type declarations
 import config from '../../.dependency-cruiser.js';
 
 /**
@@ -18,19 +22,17 @@ import config from '../../.dependency-cruiser.js';
  */
 describe('architecture boundary rules', () => {
   it('should have no violations', async () => {
-    const result = await cruise(['src/', 'modules/', 'contracts/'], {
+    const result: any = await cruise(['src/', 'modules/', 'contracts/'], {
       ...config,
       baseDir: process.cwd(),
     });
 
-    const violations = (result as { output?: { violations?: unknown[] } }).output?.violations ?? [];
+    const violations: Array<{ rule?: { name?: string }; from: string; to: string }> =
+      result.output?.violations ?? [];
 
     if (violations.length > 0) {
       const details = violations
-        .map(
-          (v: { rule?: { name?: string }; from: string; to: string }) =>
-            `  - [${v.rule?.name ?? 'unknown'}] ${v.from} → ${v.to}`,
-        )
+        .map((v) => `  - [${v.rule?.name ?? 'unknown'}] ${v.from} → ${v.to}`)
         .join('\n');
       throw new Error(
         `Architecture boundary violations detected (${violations.length}):\n${details}\n\nFix the imports above. Do not weaken the rules in .dependency-cruiser.js.`,
