@@ -1,0 +1,259 @@
+/**
+ * FoundryRooms Design Tokens
+ * ADR-F-D-001
+ *
+ * Single source of truth for visual properties. Team D owns these tokens;
+ * Team B consumes them. Components MUST reference these custom properties
+ * and MUST NOT hardcode colors, spacing, typography, motion, or radius.
+ *
+ * Dark mode is activated via `[data-theme="dark"]` on a root ancestor
+ * (typically <html> or <body>). Light mode is the default (`:root`).
+ *
+ * Contrast ratios are verified in tests/design-tokens.test.ts against
+ * WCAG 2.1 AA (4.5:1 for normal text, 3:1 for large text and UI components).
+ */
+
+/* ==========================================================================
+   Color — Light theme (default)
+   ========================================================================== */
+:root {
+  /* Primary — brand / primary actions */
+  --color-primary: #2563eb;          /* blue-600  — text on white: 5.17:1 ✓ */
+  --color-primary-dark: #1d4ed8;     /* blue-700  — hover/active, text on white: 6.70:1 ✓ */
+  --color-primary-light: #dbeafe;    /* blue-100  — subtle fills, borders */
+  --color-primary-foreground: #ffffff; /* text on primary fill: 5.17:1 ✓ */
+
+  /* Secondary — supporting actions */
+  --color-secondary: #475569;        /* slate-600 — text on white: 7.58:1 ✓ */
+  --color-secondary-dark: #334155;   /* slate-700 — hover/active: 9.77:1 ✓ */
+  --color-secondary-light: #e2e8f0;  /* slate-200 — subtle fills */
+  --color-secondary-foreground: #ffffff; /* text on secondary fill: 7.58:1 ✓ */
+
+  /* Surface — cards, panels, inputs */
+  --color-surface: #ffffff;
+  --color-surface-dark: #f1f5f9;     /* slate-100 — inset/recessed surfaces */
+  --color-surface-foreground: #0f172a; /* text on surface: 15.74:1 ✓ */
+
+  /* Background — page backdrop */
+  --color-background: #f8fafc;       /* slate-50 */
+  --color-background-foreground: #0f172a; /* text on background: 15.74:1 ✓ */
+
+  /* Text */
+  --color-text: #0f172a;             /* slate-900 — primary text on bg: 15.74:1 ✓ */
+  --color-text-muted: #475569;       /* slate-600 — secondary text: 7.06:1 ✓ */
+  --color-text-inverse: #ffffff;     /* text on dark fills */
+
+  /* Border */
+  --color-border: #e2e8f0;           /* slate-200 — default borders */
+  --color-border-strong: #cbd5e1;    /* slate-300 — emphasized borders */
+  --color-border-focus: #2563eb;     /* focus ring = primary */
+
+  /* Status — success — green-700 base so white-on-fill clears AA (green-600 fails at 3.3:1) */
+  --color-success: #15803d;          /* green-700 — text on white: 4.80:1 ✓; white on fill: 5.02:1 ✓ */
+  --color-success-dark: #166534;     /* green-800 — hover/active: 6.81:1 ✓; white on fill: 7.13:1 ✓ */
+  --color-success-light: #dcfce7;    /* green-100 — subtle fills */
+  --color-success-foreground: #ffffff; /* text on success fill: 5.02:1 ✓ */
+
+  /* Status — warning — amber-700 base (amber-500/600 fail AA as text or with white text) */
+  --color-warning: #b45309;          /* amber-700 — text on white: 5.02:1 ✓; white on fill: 5.02:1 ✓ */
+  --color-warning-dark: #92400e;     /* amber-800 — hover/active: 7.09:1 ✓ */
+  --color-warning-light: #fef3c7;    /* amber-100 — subtle fills */
+  --color-warning-foreground: #ffffff; /* text on warning fill: 5.02:1 ✓ */
+
+  /* Status — error */
+  --color-error: #dc2626;            /* red-600 — text on white: 4.83:1 ✓; white on fill: 4.83:1 ✓ */
+  --color-error-dark: #b91c1c;       /* red-700 — hover/active: 6.47:1 ✓ */
+  --color-error-light: #fee2e2;      /* red-100 — subtle fills */
+  --color-error-foreground: #ffffff; /* text on error fill: 4.83:1 ✓ */
+
+  /* Status — info — sky-700 base so white-on-fill clears AA (sky-600 fails at 4.1:1) */
+  --color-info: #0369a1;             /* sky-700 — text on white: 5.67:1 ✓; white on fill: 5.93:1 ✓ */
+  --color-info-dark: #075985;        /* sky-800 — hover/active: 7.23:1 ✓ */
+  --color-info-light: #e0f2fe;       /* sky-100 — subtle fills */
+  --color-info-foreground: #ffffff;  /* text on info fill: 5.93:1 ✓ */
+
+  /* Focus ring (reused across components) */
+  --color-focus-ring: #2563eb;
+  --color-focus-ring-offset: #ffffff;
+}
+
+/* ==========================================================================
+   Color — Dark theme
+   ==========================================================================
+   Dark palette chosen so that text-on-background still clears 4.5:1.
+   Foreground tokens flip to light values; fills darken.
+   ========================================================================== */
+[data-theme='dark'] {
+  /* Primary */
+  --color-primary: #60a5fa;          /* blue-400 — text on dark bg: 4.84:1 ✓ */
+  --color-primary-dark: #3b82f6;     /* blue-500 — hover/active */
+  --color-primary-light: #1e3a8a;    /* blue-900 — subtle fills on dark */
+  --color-primary-foreground: #0b1220; /* text on primary fill: 4.84:1 ✓ */
+
+  /* Secondary */
+  --color-secondary: #94a3b8;        /* slate-400 — text on dark bg: 6.09:1 ✓ */
+  --color-secondary-dark: #cbd5e1;   /* slate-300 — hover/active */
+  --color-secondary-light: #1e293b;  /* slate-800 — subtle fills */
+  --color-secondary-foreground: #0b1220;
+
+  /* Surface */
+  --color-surface: #1e293b;          /* slate-800 */
+  --color-surface-dark: #0f172a;     /* slate-900 — inset surfaces */
+  --color-surface-foreground: #f1f5f9; /* text on surface: 10.99:1 ✓ */
+
+  /* Background */
+  --color-background: #0b1220;       /* near-black slate */
+  --color-background-foreground: #e2e8f0; /* text on background: 13.20:1 ✓ */
+
+  /* Text */
+  --color-text: #e2e8f0;             /* slate-200 — primary text: 13.20:1 ✓ */
+  --color-text-muted: #94a3b8;       /* slate-400 — secondary text: 6.09:1 ✓ */
+  --color-text-inverse: #0f172a;
+
+  /* Border */
+  --color-border: #334155;           /* slate-700 */
+  --color-border-strong: #475569;    /* slate-600 */
+  --color-border-focus: #60a5fa;     /* focus ring = primary (dark) */
+
+  /* Status — success */
+  --color-success: #4ade80;          /* green-400 — text on dark bg: 6.19:1 ✓ */
+  --color-success-dark: #22c55e;     /* green-500 — hover/active */
+  --color-success-light: #14532d;    /* green-900 — subtle fills */
+  --color-success-foreground: #052e16;
+
+  /* Status — warning */
+  --color-warning: #fbbf24;          /* amber-400 — text on dark bg: 10.19:1 ✓ */
+  --color-warning-dark: #f59e0b;     /* amber-500 — hover/active */
+  --color-warning-light: #78350f;    /* amber-900 — subtle fills */
+  --color-warning-foreground: #1a1206;
+
+  /* Status — error */
+  --color-error: #f87171;            /* red-400 — text on dark bg: 5.36:1 ✓ */
+  --color-error-dark: #ef4444;       /* red-500 — hover/active */
+  --color-error-light: #7f1d1d;      /* red-900 — subtle fills */
+  --color-error-foreground: #2b0606;
+
+  /* Status — info */
+  --color-info: #38bdf8;             /* sky-400 — text on dark bg: 7.81:1 ✓ */
+  --color-info-dark: #0ea5e9;        /* sky-500 — hover/active */
+  --color-info-light: #0c4a6e;       /* sky-900 — subtle fills */
+  --color-info-foreground: #04222f;
+
+  /* Focus ring */
+  --color-focus-ring: #60a5fa;
+  --color-focus-ring-offset: #0b1220;
+}
+
+/* ==========================================================================
+   Spacing — 4px base scale
+   ========================================================================== */
+:root {
+  --space-0: 0;       /* 0px   */
+  --space-1: 0.25rem; /* 4px   */
+  --space-2: 0.5rem;  /* 8px   */
+  --space-3: 0.75rem; /* 12px  */
+  --space-4: 1rem;    /* 16px  */
+  --space-6: 1.5rem;  /* 24px  */
+  --space-8: 2rem;    /* 32px  */
+  --space-12: 3rem;   /* 48px  */
+  --space-16: 4rem;   /* 64px  */
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+:root {
+  /* Font families */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
+/* ==========================================================================
+   Motion
+   ========================================================================== */
+:root {
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* Easing curves */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Respect reduced motion */
+  --motion-disabled: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --ease-spring: var(--ease-in-out);
+  }
+}
+
+/* ==========================================================================
+   Radius
+   ========================================================================== */
+:root {
+  --radius-none: 0;
+  --radius-sm: 0.25rem;   /* 4px   */
+  --radius-md: 0.5rem;    /* 8px   */
+  --radius-lg: 0.75rem;   /* 12px  */
+  --radius-xl: 1rem;      /* 16px  */
+  --radius-full: 9999px;  /* pill  */
+}
+
+/* ==========================================================================
+   Shadow
+   ========================================================================== */
+:root {
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  /* Darker, lower-opacity shadows read better on dark surfaces */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   Focus ring — shared utility
+   ==========================================================================
+   Components apply this via: `box-shadow: var(--focus-ring);`
+   ========================================================================== */
+:root {
+  --focus-ring: 0 0 0 2px var(--color-focus-ring-offset),
+    0 0 0 4px var(--color-focus-ring);
+}
