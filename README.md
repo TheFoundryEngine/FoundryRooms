@@ -98,6 +98,30 @@ Push to main (or PR → main)
 
 See [Infrastructure Setup Guide](docs/INFRASTRUCTURE_SETUP.md) for full setup details.
 
+## Development Workflow (Linear + ADRs)
+
+Linear is the source of truth for product management and issue tracking.
+
+```
+Dev effort identified
+    ├──► ADR created (docs/adr/features/ or docs/adr/global/)
+    ├──► Linear issue created under the appropriate project, assigned to a developer
+    ├──► Feature branch: feat/<dev-name>/<linear-issue>-<description>
+    ├──► Development + tests (unit, integration, contract, architecture)
+    ├──► PR opened targeting main (references Linear issue, e.g. "Closes FRA-12")
+    │      ├── Governor Agent reviews for ADR compliance
+    │      └── CI checks run (lint, tests, build, typecheck)
+    └──► Governor Agent merges PR into main
+           ├── Render auto-deploys
+           ├── Deploy workflow runs Neon migrations (after CI passes)
+           └── Linear issue auto-closes via PR reference
+```
+
+**Branch naming**: `feat/<dev-name>/<linear-issue>-<short-description>`
+- Example: `feat/nick/FRA-12-invitation-flow`
+
+See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for full rules.
+
 ## Documentation
 
 - [Product & Architecture Spec](docs/spec/HIGH_LEVEL_SPEC.md)

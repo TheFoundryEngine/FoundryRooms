@@ -134,22 +134,75 @@ Do not keep branches such as:
 These drift too easily and become shadow codebases.
 
 ## 4.3 Use short-lived work branches
+
+Branch naming convention: `feat/<dev-name>/<linear-issue>-<short-description>`
+
 Examples:
-- `feat/identity/invitation-flow`
-- `feat/community/channel-permissions`
-- `feat/engagement/thread-replies`
-- `fix/commerce/webhook-retry`
+- `feat/nick/FRA-12-invitation-flow`
+- `feat/matt/FRA-18-webhook-retry`
+- `feat/bryan/FRA-25-thread-replies`
+- `fix/nick/FRA-31-auth-bug`
 
 Each branch should map to:
 - one bounded context where possible
 - one deliverable
+- one Linear issue
 - one ADR or feature note when architecture is affected
 
 ---
 
-## 5. ADR Governance Model
+## 5. Linear Integration
 
-## 5.1 Global ADRs
+Linear is the source of truth for product management and issue tracking.
+
+### Workflow
+
+```
+Dev effort identified
+    │
+    ├──► ADR created (docs/adr/features/ or docs/adr/global/)
+    │      Documents the architectural decision and rationale
+    │
+    ├──► Linear issue created under the appropriate project
+    │      - Linked to the ADR
+    │      - Assigned to a developer
+    │      - Tagged with team label (Team A / B / C)
+    │
+    ├──► Feature branch created: feat/<dev-name>/<linear-issue>-<description>
+    │
+    ├──► Development + tests (unit, integration, contract, architecture)
+    │
+    ├──► PR opened targeting main
+    │      - PR description references the Linear issue (e.g., "Closes FRA-12")
+    │      - Governor Agent reviews for ADR compliance and architecture rules
+    │      - CI checks run (lint, tests, build, typecheck)
+    │
+    └──► Governor Agent merges PR into main
+           - Render auto-deploys
+           - Deploy workflow runs Neon migrations (after CI passes)
+           - Linear issue auto-closes via PR reference
+```
+
+### Linear Project Structure
+
+- Each major initiative gets its own Linear project
+- Issues are tagged by team (Team A, B, C) and bounded context
+- ADRs are referenced in issue descriptions
+- GitHub PRs auto-link to Linear issues via `FRA-XX` references in PR titles/descriptions
+
+### MCP Integration
+
+Linear is connected via MCP server (`https://mcp.linear.app/mcp`) to the IDE, allowing:
+- Creating and updating issues from chat
+- Linking ADRs to issues
+- Tracking issue status
+- Managing project milestones
+
+---
+
+## 6. ADR Governance Model
+
+## 6.1 Global ADRs
 Location:
 - `docs/adr/global/`
 
@@ -163,7 +216,7 @@ Purpose:
 - authored or approved through architecture leadership
 - enforced by the Governor Agent
 
-## 5.2 Feature ADRs
+## 6.2 Feature ADRs
 Location:
 - `docs/adr/features/`
 
@@ -177,14 +230,14 @@ Purpose:
 - reviewed by the human owner
 - checked by the Governor Agent when they affect wider boundaries
 
-## 5.3 ADR rule
+## 6.3 ADR rule
 Any material architecture decision must be documented before or alongside the code that depends on it.
 
 ---
 
-## 6. Pull Request Workflow
+## 7. Pull Request Workflow
 
-## 6.1 Before work starts
+## 7.1 Before work starts
 A team must identify:
 - bounded context affected
 - deliverable
@@ -193,7 +246,7 @@ A team must identify:
 - contract changes required
 - test expectations
 
-## 6.2 During work
+## 7.2 During work
 A feature agent may be used to:
 - scaffold code
 - create tests
@@ -204,7 +257,7 @@ A feature agent may be used to:
 
 Human review is still required before PR submission.
 
-## 6.3 PR requirements
+## 7.3 PR requirements
 Every PR should include:
 - clear scope
 - linked work item or issue
@@ -214,7 +267,7 @@ Every PR should include:
 - notes on migration, jobs, contract changes, or schema changes where relevant
 - confirmation that mocks and fixtures were updated when contracts changed
 
-## 6.4 Governor review focus
+## 7.4 Governor review focus
 The Governor Agent should check:
 - architecture boundary compliance
 - dependency rule compliance
