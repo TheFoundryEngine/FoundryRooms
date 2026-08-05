@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines how ADR ownership is split across the Governor Agent and the three delivery teams.
+This document defines how ADR ownership is split across the Governor Agent and the four delivery teams.
 
 Its goal is to prevent ADR dependency chains that block feature delivery.
 
@@ -72,6 +72,7 @@ Location:
 - `docs/adr/features/team-a-community-core/`
 - `docs/adr/features/team-b-experience/`
 - `docs/adr/features/team-c-ops-monetization/`
+- `docs/adr/features/team-d-design-ux/`
 
 Owned by:
 - exactly one delivery team
@@ -92,7 +93,7 @@ If the decision is truly cross-cutting, it is not a feature ADR — it must be e
 
 ## 4. Delivery buckets
 
-FoundryRooms work is split into three delivery buckets.
+FoundryRooms work is split into four delivery buckets.
 
 ## 4.1 Bucket A — Community Core
 
@@ -184,6 +185,33 @@ Other teams consume Team C contracts, but do not co-own Team C ADRs.
 
 ---
 
+## 4.4 Bucket D — Design & UX
+
+Folder:
+- `docs/adr/features/team-d-design-ux/`
+
+Primary owner:
+- Team D
+
+Contains feature ADRs for:
+- Design system and component library specifications
+- UX flows, wireframes, and interaction specs
+- Design tokens (color, spacing, typography, motion)
+- Accessibility and visual consistency standards
+- Design handoff contracts consumed by Team B
+
+### Team D rule
+Team D owns the full ADR for any feature whose main risk is:
+- design system structure or token changes
+- UX flow or interaction spec decisions
+- accessibility conformance approach
+- design handoff contract shape consumed by frontend implementation
+
+Team B implements frontend against approved Team D design contracts, but does not co-own Team D ADRs.
+If a design change requires a frontend contract or API change, Team B owns that downstream ADR in its own bucket.
+
+---
+
 ## 5. What happens when a feature touches more than one team?
 
 This is expected.
@@ -265,6 +293,7 @@ Examples:
 - `docs/adr/features/team-a-community-core/ADR-F-A-001-invite-flow-and-membership-activation.md`
 - `docs/adr/features/team-b-experience/ADR-F-B-001-threaded-discussion-read-model.md`
 - `docs/adr/features/team-c-ops-monetization/ADR-F-C-001-event-rsvp-reminder-scheduling.md`
+- `docs/adr/features/team-d-design-ux/ADR-F-D-001-design-token-and-component-baseline.md`
 
 ---
 
@@ -275,6 +304,7 @@ Use this naming scheme:
 - Team A: `ADR-F-A-###-<slug>.md`
 - Team B: `ADR-F-B-###-<slug>.md`
 - Team C: `ADR-F-C-###-<slug>.md`
+- Team D: `ADR-F-D-###-<slug>.md`
 
 This makes ownership visible immediately.
 

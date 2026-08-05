@@ -12,6 +12,7 @@
 #   @NickFlach         (Nick)   — Developer
 #   @EckmanTechLLC     (Matt)   — Developer
 #   @bryanyMac         (Bryan)  — Developer
+#   @TBD-Neel          (Neel)   — Developer (Team D — Design & UX)
 #
 # CODEOWNERS is advisory — it suggests reviewers but does not gate PRs by team.
 # GitHub branch protection should require 1 review from anyone, not per-team.
@@ -19,7 +20,14 @@
 # -----------------------------
 # Default — all developers notified on all changes
 # -----------------------------
-*                                           @TheFoundryEngine @NickFlach @EckmanTechLLC @bryanyMac
+*                                           @TheFoundryEngine @NickFlach @EckmanTechLLC @bryanyMac @TBD-Neel
+
+# -----------------------------
+# Team D — Design & UX (advisory reviewer for design surfaces)
+# Neel owns design system source, tokens, and UX specs.
+# Team B implements frontend in apps/frontend/ against approved design contracts.
+# -----------------------------
+/design/                                     @TBD-Neel @TheFoundryEngine
 
 # -----------------------------
 # Governance & architecture — Bryan as architect

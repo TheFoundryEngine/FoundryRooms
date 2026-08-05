@@ -9,17 +9,33 @@
     "start:dev": "ts-node src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "dev:worker": "tsc -p worker/tsconfig.json && node worker/dist/index.js"
+    "dev:worker": "tsc -p worker/tsconfig.json && node worker/dist/index.js",
+    "prepare": "husky",
+    "precommit": "lint-staged",
+    "prepush": "npm test && npx vitest run tests/contract --passWithNoTests && npm run build",
+    "arch:test": "npx vitest run tests/architecture"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix"
+    ]
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "^20.11.0",
     "@types/pg": "^8.20.0",
+    "@typescript-eslint/eslint-plugin": "^8.66.0",
+    "@typescript-eslint/parser": "^8.66.0",
+    "dependency-cruiser": "^18.1.1",
     "drizzle-kit": "^0.31.10",
+    "eslint": "^10.8.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^8.66.0",
     "vitest": "^1.2.0",
     "zod": "^3.22.4"
   },

@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-04-02
-- **Owners:** Architecture lead, Governor Agent, Team B lead
+- **Owners:** Architecture lead, Governor Agent, Team B lead, Team D lead
 - **Related:** ADR-001, ADR-002, ADR-004, ADR-006, ADR-008
 
 ## Context
@@ -56,6 +56,9 @@ FoundryRooms will use a **layered frontend architecture** with explicit boundari
 
 - Team B owns the frontend application structure and experience layer
 - Team B owns member-facing notification read models and UI contracts
+- Team D owns the design system, design tokens, component specs, UX flows, and accessibility standards in `design/`
+- Team B implements frontend in `apps/frontend/` against approved Team D design contracts, the same way it implements against approved API contracts
+- If a design contract is not yet final, Team B proceeds using placeholder/mock UI against the approved token and layout baseline
 - Cross-team frontend work requires coordination through the contract layer
 - The Governor Agent enforces that frontend changes stay within contract boundaries
 

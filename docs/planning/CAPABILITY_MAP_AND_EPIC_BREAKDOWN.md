@@ -4,7 +4,7 @@
 Working planning document.
 
 ## Purpose
-This document translates the high-level specification, governance model, and global ADRs into a build-oriented capability map that can be divided across the Governor Agent and the three dev + agent delivery teams.
+This document translates the high-level specification, governance model, and global ADRs into a build-oriented capability map that can be divided across the Governor Agent and the four dev + agent delivery teams.
 
 It exists to answer five questions:
 
@@ -75,6 +75,14 @@ Owns:
 - automation, jobs, and workflow execution
 - admin reporting and deployment/platform packaging
 
+### Team D — Design & UX
+Owns:
+- design system and component library specifications
+- UX flows, wireframes, and interaction specs
+- design tokens (color, spacing, typography, motion)
+- accessibility and visual consistency standards
+- design handoff contracts consumed by Team B for frontend implementation
+
 ---
 
 ## Capability map overview
@@ -93,6 +101,9 @@ Owns:
 | Automation and Background Jobs | Team C | Yes | ADR-004, 011, 012 |
 | Admin Reporting and Audit | Team C | Yes | ADR-002, 003, 004, 006, 010 |
 | Deployment and Packaging | Team C | Yes | ADR-008, 009, 011 |
+| Design System and Tokens | Team D | Yes | ADR-007, future ADR |
+| UX Flows and Interaction Specs | Team D | Yes | ADR-007, future ADR |
+| Accessibility Standards | Team D | Yes | ADR-007, future ADR |
 | AI Assist Features | Deferred / Shared later | Later | future ADR |
 | Video Rooms / Conferencing | Deferred / Shared later | Later | ADR-008, 009, 012 + future ADR |
 
@@ -120,6 +131,13 @@ Owns:
 - EPIC-C-004 Audit/reporting baseline
 - EPIC-C-005 Self-host packaging baseline
 
+### Team D first epics
+- EPIC-D-001 Design token and component baseline
+- EPIC-D-002 UX flow specs for identity and community surfaces
+- EPIC-D-003 UX flow specs for engagement and events surfaces
+- EPIC-D-004 Accessibility conformance baseline
+- EPIC-D-005 Design handoff contract for Team B consumption
+
 ---
 
 ## MVP delivery waves
@@ -134,7 +152,7 @@ Exit criteria:
 - teams can start local ADRs and feature work
 
 ### Wave 1 — Core viability
-Primary owners: Team A + Team B
+Primary owners: Team A + Team B + Team D
 Support: Team C
 
 Exit criteria:
@@ -142,10 +160,11 @@ Exit criteria:
 - members can enter communities/spaces/channels
 - members can create and view core content
 - admins can manage basic structure
+- design system baseline is in place and Team B is implementing against it
 
 ### Wave 2 — Monetization and operational readiness
 Primary owner: Team C
-Support: Team A + Team B
+Support: Team A + Team B + Team D
 
 Exit criteria:
 - paid access works
@@ -154,12 +173,13 @@ Exit criteria:
 - self-host baseline is documented
 
 ### Wave 3 — Experience hardening
-Owners: Team B + Team C
+Owners: Team B + Team C + Team D
 Support: Team A
 
 Exit criteria:
-- UX is production-ready
+- UX is production-ready and matches approved design contracts
 - realtime behavior is stable and hydration-safe
+- accessibility conformance targets are met
 - platform is releasable for OSS self-host evaluation
 
 ---

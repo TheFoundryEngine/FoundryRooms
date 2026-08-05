@@ -68,6 +68,14 @@ Location: `docs/adr/features/team-c-ops-monetization/`
 |-----|-------|--------|------|------|
 | _(none yet)_ | | | | |
 
+### Team D — Design & UX
+
+Location: `docs/adr/features/team-d-design-ux/`
+
+| ADR | Title | Status | Date | File |
+|-----|-------|--------|------|------|
+| _(none yet)_ | | | | |
+
 ---
 
 ## Numbering Rules
@@ -85,10 +93,13 @@ Location: `docs/adr/features/team-c-ops-monetization/`
 4. **Team C feature ADRs** use: `ADR-F-C-001`, `ADR-F-C-002`, ...
    - Next available: **ADR-F-C-001**
 
-5. **No number is ever reused**, even if an ADR is superseded or withdrawn.
+5. **Team D feature ADRs** use: `ADR-F-D-001`, `ADR-F-D-002`, ...
+   - Next available: **ADR-F-D-001**
+
+6. **No number is ever reused**, even if an ADR is superseded or withdrawn.
    - Superseded ADRs keep their number and get `Status: Superseded by ADR-XXX`.
 
-6. **When creating a new ADR:**
+7. **When creating a new ADR:**
    - Check this index for the next available number
    - Create the file using the naming convention
    - Add a row to this index in the same PR

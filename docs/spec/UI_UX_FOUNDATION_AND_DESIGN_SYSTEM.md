@@ -17,7 +17,7 @@ That means the interface is not decoration layered on top of the product. The in
 
 This document exists to ensure:
 - the product feels coherent across all modules
-- the three delivery teams build within one visual and interaction system
+- the four delivery teams build within one visual and interaction system
 - the frontend stays compatible with a Nuxt-based application model
 - the UI avoids SSR/hydration pitfalls while still feeling lively and modern
 - design decisions can be turned into screen specs, component work, and feature work without drift
@@ -379,12 +379,13 @@ Reduced-motion preferences must be respected.
 
 ## 15. Cross-team design governance
 
-To avoid three teams inventing three interfaces, the following rules apply:
-- all shared visual tokens are centralized
+To avoid four teams inventing four interfaces, the following rules apply:
+- all shared visual tokens are centralized (owned by Team D)
 - shared shell/navigation components are centralized
 - no team creates competing component variants without review
 - reusable components must be documented before broad reuse
 - page-level design changes that affect other teams must be reviewed centrally
+- Team D owns the design system; Team B implements frontend against approved Team D design contracts
 
 The governor owns the baseline design system and shell rules until a dedicated design function exists.
 

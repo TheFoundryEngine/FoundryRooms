@@ -31,7 +31,7 @@ FoundryRooms uses a **governed flow model**.
 
 ### Core structure
 - **1 Governor Agent** oversees conformance into `main`
-- **3 Human Developers** can work on any bounded context
+- **4 Human Developers** can work on any bounded context
 - **Feature Agents** pair with developers as needed
 
 ### Flow principles
@@ -85,6 +85,22 @@ All developers can work on any bounded context. There are no team silos.
 
 **Matt Eckman** (@EckmanTechLLC) — Developer
 - Can pick up any Linear issue across any bounded context
+
+**Neel** (@TBD-Neel) — Developer (Design & UX focus)
+- Can pick up any Linear issue across any bounded context
+- Primary focus: design system, UX flows, design tokens, accessibility
+- Owns `design/` and design handoff contracts consumed by frontend implementation
+
+### Delivery team focus areas (for ADR ownership)
+
+While any developer can work on any context, ADR ownership and accountability use delivery team buckets. This keeps feature ADRs singly owned without creating team silos for everyday work.
+
+- **Team A (Community Core)** — Identity & Access + Community Structure
+- **Team B (Experience Layer)** — Engagement + Resources + frontend implementation
+- **Team C (Operations & Monetization)** — Events + Commerce + Automation + Admin
+- **Team D (Design & UX)** — Design system + UX flows + design tokens + accessibility; hands off design contracts to Team B for frontend implementation
+
+Team D produces design artifacts as consumable contracts in `design/`, not production app code. Team B implements frontend in `apps/frontend/` against approved design contracts the same way it implements against approved API contracts.
 
 ### Bounded contexts (code boundaries, not team boundaries)
 
@@ -158,7 +174,7 @@ Dev effort identified
     ├──► Linear issue created under the appropriate project
     │      - Linked to the ADR
     │      - Assigned to a developer
-    │      - Tagged with team label (Team A / B / C)
+    │      - Tagged with team label (Team A / B / C / D)
     │
     ├──► Feature branch created: feat/<dev-name>/<linear-issue>-<description>
     │
@@ -353,6 +369,22 @@ If a developer is blocked by a not-yet-implemented dependency, they proceed usin
 ### 8.5 No ungoverned mock drift
 Mock data that diverges from agreed contracts is a defect, not a convenience.
 
+### 8.6 Mock ownership
+When a contract is new or changing, the **consuming developer** produces mocks and fixtures from the approved contract.
+The owning context owns the contract definition; the consuming developer owns the mock that lets them proceed without waiting.
+If the two diverge, the contract test fails and the owner updates the contract or the consumer updates the mock — but neither blocks the other from proceeding against the approved shape.
+
+### 8.7 Design contract parallel delivery
+Frontend implementation consumes approved Team D design contracts (tokens, component specs, UX flows) the same way it consumes approved API contracts.
+If a design contract is not yet final, the developer proceeds using placeholder/mock UI against the approved token and layout baseline.
+Frontend implementation does not block on Team D detailed design completion once the baseline design contract is approved.
+
+### 8.8 Contested contract escalation
+If two developers or teams disagree on what a shared contract should be, the disagreement must be raised as a Linear issue immediately, not stalled in PR comments.
+The Governor Agent is the named decider for contract disputes.
+SLA: the Governor must triage the dispute within 2 business days and either rule, request an ADR, or escalate to architecture leadership.
+No one may silently block another by leaving a contract dispute unresolved in review.
+
 ---
 
 ## 9. Code Ownership & Boundaries
@@ -361,8 +393,10 @@ Mock data that diverges from agreed contracts is a defect, not a convenience.
 
 ### Boundary enforcement (automated)
 Architectural boundaries are enforced by:
-1. **Governor Agent** — rejects PRs with cross-context coupling, missing ADRs, or contract drift
-2. **Architecture tests** — fail on forbidden imports, layer violations, or cross-context persistence access
+1. **Governor Agent** — two-category review model:
+   - **REJECTED** (hard block) — cross-context coupling, missing ADRs, contract drift, missing tests, undocumented architecture changes. Fails the `governor-review` check and blocks merge.
+   - **CHANGES REQUESTED** (advisory flag) — cohesion concerns, design/code alignment gaps, non-blocking suggestions, contract disputes. Posts a comment, labels the PR, and notifies Linear, but does **not** block merge. The team tracks the follow-up via Linear.
+2. **Architecture tests** (dependency-cruiser) — deterministic, automated checks that fail CI on forbidden imports, layer violations, or cross-context persistence access. See §9.1 below.
 3. **Contract tests** — fail on schema/payload drift between contexts
 4. **Human review** — any developer can flag concerns during review
 
@@ -373,6 +407,27 @@ Architectural boundaries are enforced by:
 - no architecture-significant changes without ADR updates
 - no leaking ORM entities into external contracts
 - no UI dependence on internal persistence models
+
+### 9.1 Architecture boundary tests (dependency-cruiser)
+
+Architecture boundary rules are enforced deterministically by **dependency-cruiser**, configured in `.dependency-cruiser.js` and run via `tests/architecture/boundary.test.ts`.
+
+**Enforced rules:**
+1. **Cross-context isolation** — no bounded context may import from another context's `domain/`, `application/`, or `adapters/`. Cross-context access is only allowed through `contracts/`.
+2. **Hexagonal layering** — `domain/` must not depend on `application/` or `adapters/`. `application/` must not depend on `adapters/`. Adapters depend on application and domain, never the reverse.
+3. **Domain framework independence** — `domain/` must not import NestJS, Express, Drizzle, pg, or other infrastructure frameworks.
+4. **Contract purity** — `contracts/` must not import from `adapters/` or Drizzle ORM. Contracts define external shapes, not persistence models.
+5. **Shared contracts isolation** — the shared `contracts/` directory must not import from any module's `domain/` or `adapters/`.
+
+**Where they run:**
+- **CI** — the `architecture-tests` job in `ci.yml` runs `npm run arch:test` on every PR and push to `main`
+- **Pre-push hook** — `.husky/pre-push` runs architecture tests before every `git push`
+- **Manual** — `npm run arch:test` runs them locally at any time
+
+**When a test fails:**
+- The test output names the rule violated and the import that caused it
+- Fix the import — do not weaken the rule in `.dependency-cruiser.js`
+- If a rule genuinely needs to change, it requires an ADR (it is an architecture decision)
 
 ---
 
@@ -435,6 +490,9 @@ Required for:
 - no domain dependence on infrastructure or framework code
 - no direct persistence coupling across bounded contexts
 
+Implemented with dependency-cruiser (`.dependency-cruiser.js`) and run via `tests/architecture/boundary.test.ts`. See §9.1 for the full rule set. Run locally with `npm run arch:test`.
+- no direct persistence coupling across bounded contexts
+
 ## 11.5 End-to-end tests
 Required for core user journeys.
 
@@ -466,6 +524,52 @@ CI/CD must protect `main` from architectural and quality regression.
 
 ### Principle
 A passing branch is not enough. A PR must be safe to merge into current `main`.
+
+---
+
+## 12.1 Local Pre-Commit and Pre-Push Hooks
+
+All developers must run `npm install` after cloning the repo or pulling changes that update `package.json`. The `prepare` script automatically installs husky git hooks. These hooks are **mandatory governance gates** — they are not optional.
+
+### Pre-commit hook (runs on every `git commit`)
+Runs `lint-staged` on staged files only:
+- `eslint --fix` on staged `.ts` files (auto-fixes lint issues)
+
+Purpose: catch lint errors before they enter a commit. Fast (~5 seconds).
+
+If the pre-commit hook fails:
+- eslint auto-fixes what it can; remaining errors must be fixed manually
+- use `git commit --no-verify` only in emergencies (the Governor Agent will catch issues in PR review)
+
+### Pre-push hook (runs on every `git push`)
+Runs full local quality checks:
+- `npm test` (unit tests)
+- `npm run arch:test` (architecture boundary tests via dependency-cruiser)
+- `npx vitest run tests/contract --passWithNoTests` (contract tests)
+- `npm run build` (build + typecheck across project references)
+
+Purpose: catch test failures, boundary violations, and build errors before they reach CI. Slower (~30-60 seconds) but prevents pushing code that will fail CI.
+
+If the pre-push hook fails:
+- fix the failing tests, boundary violation, or build errors, then push again
+- use `git push --no-verify` only in emergencies — CI will still fail and the Governor Agent will flag the PR
+
+### What the hooks do NOT replace
+- CI still runs the full suite including integration tests (Postgres) and architecture tests
+- The Governor Agent still does architectural review on the PR
+- Integration tests are excluded from pre-push because they require a running Postgres instance
+
+### Manual runs
+Developers can run the checks manually at any time:
+- `npm run precommit` — lint-staged on all files
+- `npm run prepush` — unit tests + contract tests + build
+- `npm run arch:test` — architecture boundary tests only
+- `npm run lint` — eslint on the whole repo
+- `npm run typecheck` — tsc on the whole repo
+- `npm test` — all unit tests
+
+### Agent guidance
+Feature agents and AI assistants working in this repo must also respect these hooks. If an agent's commit or push is rejected by a hook, the agent must fix the issue, not bypass the hook with `--no-verify`.
 
 ---
 
@@ -542,11 +646,13 @@ If GitHub’s agent platform requires repository instruction files such as `.git
 - contracts
 - architecture
 - build
+- governor-review (fails on REJECTED only; CHANGES REQUESTED passes and is advisory)
 
 ### Merge discipline
 - squash or rebase only
 - conventional PR titles if you want release automation later
 - no bypass except for explicitly designated maintainers in emergencies
+- Governor Agent REJECTED blocks merge; CHANGES REQUESTED does not — the team is notified via Linear and tracks follow-up separately
 
 ---
 

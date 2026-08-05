@@ -23,6 +23,8 @@ FoundryRooms uses a multi-layered testing approach to ensure quality and archite
 - **Purpose**: Enforce architectural rules and boundaries
 - **Location**: `tests/architecture/`
 - **Coverage**: Forbidden imports, layer enforcement, dependency rules
+- **Tool**: dependency-cruiser (`.dependency-cruiser.js`)
+- **Run**: `npm run arch:test`
 
 ### End-to-End Tests
 - **Purpose**: Test critical user journeys

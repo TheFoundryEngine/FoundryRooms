@@ -14,6 +14,7 @@ Preserve a clean, modular, contract-driven community platform architecture while
 - Prefer composition over inheritance-heavy object hierarchies.
 - Keep domain logic framework-independent where possible.
 - Never bypass required tests or documentation updates.
+- Never bypass pre-commit or pre-push hooks with `--no-verify`. If a hook fails, fix the issue.
 
 ## Layers
 - Domain: business rules only
@@ -38,3 +39,18 @@ When changing a cross-team or external contract, update:
 
 ## Review posture
 Default to rejecting changes that trade long-term structure for short-term convenience.
+
+## Local hooks
+This repo uses husky git hooks (installed automatically via `npm install`):
+- **pre-commit**: `lint-staged` runs eslint on staged `.ts` files
+- **pre-push**: unit tests + architecture boundary tests + contract tests + build
+
+If a hook rejects your commit or push, fix the issue. Do not use `--no-verify` to bypass hooks. See `docs/governance/DEVELOPMENT_GOVERNANCE.md` §12.1 for full details.
+
+## Architecture boundary tests
+Architecture boundaries are enforced deterministically by dependency-cruiser:
+- Config: `.dependency-cruiser.js`
+- Tests: `tests/architecture/boundary.test.ts`
+- Run: `npm run arch:test`
+
+Rules enforced: cross-context isolation, hexagonal layering, domain framework independence, contract purity. If an architecture test fails, fix the import — do not weaken the rule. Rule changes require an ADR.

@@ -47,23 +47,20 @@ jobs:
         uses: actions/github-script@v7
         env:
           REVIEW_TEXT: ${{ steps.governor.outputs.review }}
+          VERDICT: ${{ steps.governor.outputs.verdict }}
         with:
           script: |
             const reviewText = process.env.REVIEW_TEXT || 'Governor Agent review failed -- check workflow logs.';
+            const verdict = process.env.VERDICT || 'unknown';
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Post as a formal PR review (not just a comment)
-            const isRejected = reviewText.includes('REJECTED');
-            const isChangesRequested = reviewText.includes('CHANGES REQUESTED');
-            const isApproved = reviewText.includes('APPROVED');
-
+            // REJECTED → REQUEST_CHANGES (blocks merge via GitHub review state)
+            // CHANGES REQUESTED → COMMENT (advisory, does not block merge)
+            // APPROVED → COMMENT (GitHub Actions cannot approve PRs by default)
             let event = 'COMMENT';
-            if (isRejected || isChangesRequested) event = 'REQUEST_CHANGES';
-            // Note: APPROVE is not used because GitHub Actions cannot approve PRs
-            // by default. The governor-approved label + comment body signal approval.
-            // The auto-merge workflow still requires a separate human approval.
+            if (verdict === 'rejected') event = 'REQUEST_CHANGES';
 
             await github.rest.pulls.createReview({
               owner,
@@ -75,11 +72,12 @@ jobs:
 
             // Add a label to make the status immediately visible
             let label = 'governor-review-failed';
-            if (isApproved) label = 'governor-approved';
-            else if (isRejected || isChangesRequested) label = 'governor-rejected';
+            if (verdict === 'approved') label = 'governor-approved';
+            else if (verdict === 'rejected') label = 'governor-rejected';
+            else if (verdict === 'changes-requested') label = 'governor-changes-requested';
 
             // Remove all governor labels first
-            for (const oldLabel of ['governor-approved', 'governor-rejected', 'governor-review-failed']) {
+            for (const oldLabel of ['governor-approved', 'governor-rejected', 'governor-changes-requested', 'governor-review-failed']) {
               try {
                 await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name: oldLabel });
               } catch (e) { /* label may not exist, ignore */ }
@@ -88,8 +86,8 @@ jobs:
               await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [label] });
             } catch (e) { /* label may not exist yet, ignore */ }
 
-      - name: Notify Linear on rejection
-        if: always() && contains(steps.governor.outputs.review, 'REJECTED')
+      - name: Notify Linear on rejection or changes requested
+        if: always() && (steps.governor.outputs.verdict == 'rejected' || steps.governor.outputs.verdict == 'changes-requested')
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -97,4 +95,5 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           REVIEW_TEXT: ${{ steps.governor.outputs.review }}
+          VERDICT: ${{ steps.governor.outputs.verdict }}
         run: bash scripts/linear-notify.sh

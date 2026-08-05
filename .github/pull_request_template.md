@@ -18,8 +18,15 @@
 - [ ] Notifications
 - [ ] Automation
 - [ ] Admin & Reporting
+- [ ] Design System & UX (Team D)
 - [ ] Shared platform / repo governance
 - [ ] Cross-context change
+
+## Team Focus (for ADR ownership)
+- [ ] Team A — Community Core
+- [ ] Team B — Experience Layer
+- [ ] Team C — Operations & Monetization
+- [ ] Team D — Design & UX
 
 ## Change Type
 - [ ] Feature
