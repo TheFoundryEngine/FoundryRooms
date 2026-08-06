@@ -245,6 +245,7 @@ See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for full
 
 ## Documentation
 
+- [North-Star Vision](docs/spec/NORTH_STAR_VISION.md) — the full vision: relational foundation, AI-native operations, collaborative building
 - [Product & Architecture Spec](docs/spec/HIGH_LEVEL_SPEC.md)
 - [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md)
 - [ADR Index](docs/adr/ADR_INDEX.md) — all ADRs with numbering rules

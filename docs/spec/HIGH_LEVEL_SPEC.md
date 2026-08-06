@@ -1,5 +1,9 @@
 # FoundryRooms — High-Level Product & Architecture Spec v0.2
 
+> **Parent document:** [North-Star Vision](NORTH_STAR_VISION.md) — the full
+> three-layer vision (relational foundation, AI-native operations, collaborative
+> building). This spec defines Layer 1 (v1) in detail.
+
 ## 1. Purpose
 
 This document defines the initial high-level product and architecture spec for **FoundryRooms**.
