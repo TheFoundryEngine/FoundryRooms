@@ -143,19 +143,35 @@ These drift too easily and become shadow codebases.
 
 ## 4.3 Use short-lived work branches
 
-Branch naming convention: `feat/<dev-name>/<linear-issue>-<short-description>`
+### Branch granularity
+
+Branches are created **per ADR** (not per sub-issue). An ADR is the unit of
+architectural review — its sub-issues are implementation tasks within a single
+decision, not independent deliverables. Grouping them into one branch:
+
+- gives the Governor Agent a coherent diff to review against the ADR
+- avoids cross-dependency churn between tightly-coupled sub-issues
+- keeps PR count manageable (one PR per ADR, not one per task)
+
+When work does not belong to an ADR (standalone bug fix, small feature), use a
+per-issue branch.
+
+### Branch naming convention
+
+**Per-ADR (default):** `feat/adr-<adr-id>-<short-description>`
+
+**Per-issue (standalone work):** `feat/<dev-name>/<linear-issue>-<short-description>`
 
 Examples:
-- `feat/nick/FRA-12-invitation-flow`
-- `feat/matt/FRA-18-webhook-retry`
-- `feat/bryan/FRA-25-thread-replies`
-- `fix/nick/FRA-31-auth-bug`
+- `feat/adr-f-a-001-auth-foundation` — all sub-issues of ADR-F-A-001
+- `feat/adr-f-b-001-frontend-shell` — all sub-issues of ADR-F-B-001
+- `feat/bryan/THE-31-auth-bug` — standalone fix, no ADR
+- `fix/nick/THE-45-invite-expiration` — standalone bug fix
 
 Each branch should map to:
 - one bounded context where possible
-- one deliverable
-- one Linear issue
-- one ADR or feature note when architecture is affected
+- one ADR (with all its sub-issues) **or** one standalone Linear issue
+- one PR targeting `main`
 
 ---
 

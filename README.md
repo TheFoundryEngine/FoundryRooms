@@ -225,16 +225,17 @@ Linear is the source of truth for product management and issue tracking.
 ```
 Dev effort identified
     ├──► ADR created (docs/adr/features/ or docs/adr/global/)
-    ├──► Linear issue created under the appropriate project, assigned to a developer
-    ├──► Feature branch: feat/<dev-name>/<linear-issue>-<description>
+    ├──► Linear parent issue created under the appropriate project
+    ├──► Linear sub-issues created and linked to parent ADR issue
+    ├──► Feature branch: feat/adr-<adr-id>-<description> (one branch per ADR)
     ├──► Development + tests (unit, integration, contract, architecture)
-    ├──► PR opened targeting main (references Linear issue, e.g. "Closes FRA-12")
+    ├──► PR opened targeting main (references Linear parent issue, e.g. "Closes THE-5")
     │      ├── Governor Agent reviews for ADR compliance
     │      └── CI checks run (lint, tests, build, typecheck)
     └──► Governor Agent merges PR into main
            ├── Render auto-deploys
            ├── Deploy workflow runs Neon migrations (after CI passes)
-           └── Linear issue auto-closes via PR reference
+           └── Linear sub-issues auto-close via PR reference
 ```
 
 **Branch naming**: `feat/<dev-name>/<linear-issue>-<short-description>`
