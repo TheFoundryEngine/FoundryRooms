@@ -129,6 +129,43 @@ module.exports = {
         path: '^modules/[^/]+/(domain|adapters)/',
       },
     },
+
+    // ── 6. Composition root and worker boundaries (ADR-013) ────────────────
+    // src/ wires adapters to ports — that reach is deliberate. Domain objects
+    // are the one thing it must never touch directly.
+    {
+      name: 'src-must-not-import-domain',
+      comment: 'The composition root wires adapters and use cases; domain objects stay behind use cases and ports. See ADR-013.',
+      severity: 'error',
+      from: {
+        path: '^src/',
+      },
+      to: {
+        path: '^modules/[^/]+/domain/',
+      },
+    },
+    {
+      name: 'worker-must-not-import-module-internals',
+      comment: 'The worker runtime consumes contracts (and queues/events per ADR-011), never a context\'s domain, application, or adapters. See ADR-013.',
+      severity: 'error',
+      from: {
+        path: '^worker/',
+      },
+      to: {
+        path: '^modules/[^/]+/(domain|application|adapters)/',
+      },
+    },
+    {
+      name: 'no-module-or-contract-imports-of-runtimes',
+      comment: 'Modules and contracts never depend on the runtimes that compose them (src/, worker/). The dependency arrow points one way. See ADR-013.',
+      severity: 'error',
+      from: {
+        path: '^(modules|contracts)/',
+      },
+      to: {
+        path: '^(src|worker)/',
+      },
+    },
   ],
   options: {
     doNotFollow: 'node_modules',
