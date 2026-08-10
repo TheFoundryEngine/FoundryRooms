@@ -9,7 +9,7 @@
     "start:dev": "ts-node src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "dev:worker": "tsc -p worker/tsconfig.json && node worker/dist/index.js",
     "prepare": "husky",

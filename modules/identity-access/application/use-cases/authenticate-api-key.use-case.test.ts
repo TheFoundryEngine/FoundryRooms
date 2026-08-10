@@ -6,7 +6,7 @@ import {
   MalformedApiKeyError,
 } from './authenticate-api-key.use-case';
 import type { AuthenticateApiKeyDeps } from './authenticate-api-key.use-case';
-import { Agent, generateApiKey, hashApiKey, createApiKeyHash } from '../../domain';
+import { Agent, generateApiKey, hashApiKey, createApiKeyHash, createActorId } from '../../domain';
 import type { ApiKey } from '../../domain';
 import type { AgentRepository } from '../ports/agent.repository';
 import type { ApiKeyGeneratorPort } from '../ports/api-key-generator.port';
@@ -45,7 +45,7 @@ function createTestAgent(apiKey: ApiKey, overrides?: Partial<{
   const apiKeyHash = createApiKeyHash(hashApiKey(apiKey));
 
   return Agent.fromPersistence({
-    id: '550e8400-e29b-41d4-a716-446655440000' as any,
+    id: createActorId('550e8400-e29b-41d4-a716-446655440000'),
     type: 'agent',
     displayName: overrides?.displayName ?? 'Test Agent',
     avatarUrl: null,

@@ -5,7 +5,7 @@ import {
   AccountDeactivatedError,
 } from './login.use-case';
 import type { LoginDeps } from './login.use-case';
-import { User, createEmail, createPasswordHash, SESSION_DURATIONS } from '../../domain';
+import { User, createEmail, createPasswordHash, createActorId, SESSION_DURATIONS } from '../../domain';
 import type { UserRepository } from '../ports/user.repository';
 import type { SessionRepository } from '../ports/session.repository';
 import type { PasswordHasherPort } from '../ports/password-hasher.port';
@@ -51,7 +51,7 @@ function createTestUser(overrides?: Partial<{
   const passwordHash = createPasswordHash('$2b$10$validhashvalue');
 
   const user = User.fromPersistence({
-    id: '550e8400-e29b-41d4-a716-446655440000' as any,
+    id: createActorId('550e8400-e29b-41d4-a716-446655440000'),
     type: 'user',
     displayName: 'Test User',
     avatarUrl: null,
