@@ -5,30 +5,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ExecutionContext, HttpException } from '@nestjs/common';
 import { RateLimitGuard, InMemoryRateLimitStore } from './rate-limit.middleware';
+import type { Request, Response } from 'express';
 
 // ============================================================================
 // Helpers
 // ============================================================================
 
-function createMockRequest(overrides: Record<string, unknown> = {}): any {
+function createMockRequest(overrides: Record<string, unknown> = {}): Request {
   return {
     ip: '127.0.0.1',
     method: 'POST',
     path: '/auth/login',
     headers: {},
     ...overrides,
-  };
+  } as unknown as Request;
 }
 
-function createMockResponse(): any {
-  const res: any = {};
+function createMockResponse(): Response {
+  const res: Record<string, unknown> = {};
   res.status = vi.fn().mockReturnValue(res);
   res.set = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-  return res;
+  return res as unknown as Response;
 }
 
-function createMockExecutionContext(request: any, response?: any): ExecutionContext {
+function createMockExecutionContext(request: Request, response?: Response): ExecutionContext {
   return {
     switchToHttp: () => ({
       getRequest: () => request,
