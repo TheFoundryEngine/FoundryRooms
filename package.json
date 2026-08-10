@@ -14,7 +14,7 @@
     "dev:worker": "tsc -p worker/tsconfig.json && node worker/dist/index.js",
     "prepare": "husky",
     "precommit": "lint-staged",
-    "prepush": "npm test && npx vitest run tests/contract --passWithNoTests && npm run build",
+    "prepush": "npm test && npx vitest run tests/contract/ && npm run build",
     "arch:test": "npx vitest run tests/architecture"
   },
   "lint-staged": {
