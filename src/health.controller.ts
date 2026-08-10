@@ -25,6 +25,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
+import { DRIZZLE_DB } from './tokens';
 
 /** Minimal surface this controller needs from the database handle. */
 export interface Queryable {
@@ -61,7 +62,7 @@ export class HealthController {
   private readonly timeoutMs: number;
 
   constructor(
-    @Inject('PG_POOL') private readonly db: Queryable,
+    @Inject(DRIZZLE_DB) private readonly db: Queryable,
     @Optional() @Inject(READINESS_TIMEOUT_MS) timeoutMs?: number,
   ) {
     this.timeoutMs = timeoutMs ?? DEFAULT_READINESS_TIMEOUT_MS;

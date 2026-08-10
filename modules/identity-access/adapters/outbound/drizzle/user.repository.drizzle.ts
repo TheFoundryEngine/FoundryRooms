@@ -6,7 +6,7 @@
  */
 
 import { eq } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { Db } from './db';
 import type {
   ActorId,
   ActorType,
@@ -22,7 +22,6 @@ import {
 } from '../../../domain';
 import type { UserRepository } from '../../../application/ports/user.repository';
 import { actors, users } from './schema.js';
-import type * as schema from './schema.js';
 
 /**
  * Database row type for joined actor + user data
@@ -71,7 +70,7 @@ function toDomain(row: UserRow): DomainUser {
  * Drizzle implementation of UserRepository
  */
 export class UserRepositoryDrizzle implements UserRepository {
-  constructor(private readonly db: NodePgDatabase<typeof schema>) {}
+  constructor(private readonly db: Db) {}
 
   /**
    * Finds a user by their unique identifier
