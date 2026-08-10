@@ -6,6 +6,7 @@
 
 // Schema and types
 export * from './schema.js';
+export type { Db } from './db.js';
 
 // Repository implementations
 export { UserRepositoryDrizzle } from './user.repository.drizzle.js';

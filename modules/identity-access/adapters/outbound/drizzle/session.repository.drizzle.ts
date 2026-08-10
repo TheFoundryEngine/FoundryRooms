@@ -6,7 +6,7 @@
  */
 
 import { eq } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { Db } from './db';
 import type {
   ActorId,
   ActorType,
@@ -17,7 +17,6 @@ import type {
 import { createActorId, createSessionId, hashSessionToken, Session, createSessionToken } from '../../../domain';
 import type { SessionRepository } from '../../../application/ports/session.repository';
 import { actors, sessions } from './schema.js';
-import type * as schema from './schema.js';
 
 /**
  * Database row type for session with actor type lookup
@@ -55,7 +54,7 @@ function toDomain(row: SessionRow, actorType: ActorType): DomainSession {
  * Drizzle implementation of SessionRepository
  */
 export class SessionRepositoryDrizzle implements SessionRepository {
-  constructor(private readonly db: NodePgDatabase<typeof schema>) {}
+  constructor(private readonly db: Db) {}
 
   /**
    * Finds a session by its unique identifier

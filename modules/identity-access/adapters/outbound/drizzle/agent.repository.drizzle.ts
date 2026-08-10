@@ -6,12 +6,11 @@
  */
 
 import { eq } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { Db } from './db';
 import type { ActorId, Agent as DomainAgent, AgentProps } from '../../../domain';
 import { createActorId, createApiKeyHash, Agent } from '../../../domain';
 import type { AgentRepository } from '../../../application/ports/agent.repository';
 import { actors, agents } from './schema.js';
-import type * as schema from './schema.js';
 
 /**
  * Database row type for joined actor + agent data
@@ -75,7 +74,7 @@ function extractApiKeyPrefix(apiKey: string): string {
  * Drizzle implementation of AgentRepository
  */
 export class AgentRepositoryDrizzle implements AgentRepository {
-  constructor(private readonly db: NodePgDatabase<typeof schema>) {}
+  constructor(private readonly db: Db) {}
 
   /**
    * Finds an agent by their unique identifier
