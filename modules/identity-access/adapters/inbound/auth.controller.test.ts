@@ -22,6 +22,7 @@ import {
   SessionExpiredError,
 } from '../../application/use-cases/refresh-session.use-case';
 import type { ActorId, Email, SessionToken } from '../../domain';
+import type { Response } from 'express';
 
 // ============================================================================
 // Mocks
@@ -51,11 +52,11 @@ function createMockRefreshSessionUseCase(): RefreshSessionUseCase {
   } as unknown as RefreshSessionUseCase;
 }
 
-function createMockResponse(): any {
+function createMockResponse(): Response {
   return {
     cookie: vi.fn(),
     clearCookie: vi.fn(),
-  };
+  } as unknown as Response;
 }
 
 // ============================================================================

@@ -55,8 +55,11 @@ import { RefreshSessionUseCase } from '../modules/identity-access/application/us
 import { CreateAgentUseCase } from '../modules/identity-access/application/use-cases/create-agent.use-case';
 
 import { drizzle } from 'drizzle-orm/node-postgres';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 import * as schema from '../modules/identity-access/adapters/outbound/drizzle/schema';
+
+type Db = NodePgDatabase<typeof schema>;
 
 class NoopEventEmitter implements EventEmitterPort {
   async emit(_event: DomainEvent): Promise<void> {}
@@ -78,17 +81,17 @@ class NoopEventEmitter implements EventEmitterPort {
     },
     {
       provide: AGENT_REPOSITORY,
-      useFactory: (db: any) => new AgentRepositoryDrizzle(db),
+      useFactory: (db: Db) => new AgentRepositoryDrizzle(db),
       inject: ['PG_POOL'],
     },
     {
       provide: SESSION_REPOSITORY,
-      useFactory: (db: any) => new SessionRepositoryDrizzle(db),
+      useFactory: (db: Db) => new SessionRepositoryDrizzle(db),
       inject: ['PG_POOL'],
     },
     {
       provide: 'USER_REPOSITORY',
-      useFactory: (db: any) => new UserRepositoryDrizzle(db),
+      useFactory: (db: Db) => new UserRepositoryDrizzle(db),
       inject: ['PG_POOL'],
     },
     {
@@ -101,7 +104,7 @@ class NoopEventEmitter implements EventEmitterPort {
     },
     {
       provide: AGENT_CONTROLLER_AGENT_REPOSITORY,
-      useFactory: (db: any) => new AgentRepositoryDrizzle(db),
+      useFactory: (db: Db) => new AgentRepositoryDrizzle(db),
       inject: ['PG_POOL'],
     },
     {
