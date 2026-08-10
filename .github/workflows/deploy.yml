@@ -10,13 +10,27 @@ on:
 permissions:
   contents: read
 
+# Serialize deploys: overlapping runs must not race migrations against each
+# other. No cancel-in-progress — an interrupted migration is worse than a
+# queued one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Migrate DB (Neon) + Deploy (Render)
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
+      # Pin to the exact commit CI validated (THE-74 / #35). Without a ref,
+      # checkout resolves branch HEAD at job start — if another PR merged
+      # while CI ran, migrations would run from a commit whose CI has not
+      # passed. workflow_dispatch has no workflow_run payload → falls back
+      # to the dispatched ref's sha.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -28,17 +42,24 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "DATABASE_URL secret not set — skipping migrations"
-            exit 0
+            # A missing/rotated/misnamed secret must fail the deploy loudly
+            # (THE-75 / #36) — a green run with no schema applied is the
+            # worst outcome. If a deliberate no-DB path is ever needed,
+            # gate it on an explicit workflow input, not an absent secret.
+            echo "::error::DATABASE_URL secret is not set — refusing to deploy without running migrations."
+            exit 1
           fi
           npx drizzle-kit push
 
       - name: Trigger Render deploy
         run: |
           if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            echo "RENDER_DEPLOY_HOOK_URL not set — Render auto-deploys on push"
+            # This skip is intentional: the hook is optional because Render
+            # auto-deploys on push (see README). Unlike DATABASE_URL above,
+            # nothing is silently lost here.
+            echo "RENDER_DEPLOY_HOOK_URL not set — skipping explicit hook; Render auto-deploys on push (expected setup)."
             exit 0
           fi
-          curl -X POST "$RENDER_DEPLOY_HOOK_URL"
+          curl --fail-with-body -X POST "$RENDER_DEPLOY_HOOK_URL"
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
