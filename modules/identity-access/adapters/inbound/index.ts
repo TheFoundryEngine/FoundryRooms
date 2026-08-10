@@ -19,6 +19,11 @@ export {
   type AuthenticatedRequest,
 } from './auth.middleware';
 export {
+  RequestAuthenticator,
+  AuthenticationInfrastructureError,
+  TOUCH_INTERVAL_MS,
+} from './request-authenticator';
+export {
   RateLimitGuard,
   InMemoryRateLimitStore,
   RATE_LIMIT_OPTIONS,

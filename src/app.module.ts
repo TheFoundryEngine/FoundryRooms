@@ -28,6 +28,7 @@ import {
   RateLimitGuard,
   InMemoryRateLimitStore,
   RATE_LIMIT_OPTIONS,
+  RequestAuthenticator,
 } from '../modules/identity-access/adapters/inbound';
 
 import {
@@ -145,6 +146,7 @@ class NoopEventEmitter implements EventEmitterPort {
         new CreateAgentUseCase({ agentRepository: agentRepo, apiKeyGenerator: keyGen, eventEmitter: emitter }),
       inject: [AGENT_CONTROLLER_AGENT_REPOSITORY, AGENT_CONTROLLER_API_KEY_GENERATOR, 'EVENT_EMITTER'],
     },
+    RequestAuthenticator,
     AuthMiddleware,
     InMemoryRateLimitStore,
     {
