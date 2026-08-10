@@ -1,44 +1,40 @@
 /**
- * Auth Middleware
+ * Auth Middleware and Guard
  *
- * Authenticates requests using either:
- * - Session cookie
- * - Authorization: Bearer <api-key> header
+ * Both delegate credential resolution to RequestAuthenticator (THE-68 /
+ * #29 removed the duplicated ~80-line copies each used to carry).
  *
- * Attaches ActorContext to the request for downstream use.
+ * - AuthMiddleware attaches ActorContext to the request when a credential
+ *   resolves; it never blocks. Enforcement is the guard's job.
+ * - AuthGuard requires an authenticated actor; absent/invalid credentials
+ *   are 401, infrastructure failures are 503 (THE-67 / #28) — a database
+ *   outage must not present as "everyone got logged out".
  */
 
 import {
   Injectable,
   NestMiddleware,
   UnauthorizedException,
+  ServiceUnavailableException,
   CanActivate,
   ExecutionContext,
-  Inject,
+  Logger,
 } from '@nestjs/common';
-import type { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
+import type { Request } from 'express';
 import type { ActorContext } from './dto';
-import type { SessionRepository } from '../../application/ports/session.repository';
-import type { ApiKeyGeneratorPort } from '../../application/ports/api-key-generator.port';
-import type { AgentRepository } from '../../application/ports/agent.repository';
-import type { ApiKey } from '../../domain';
-import { createSessionToken } from '../../domain';
+import {
+  RequestAuthenticator,
+  AuthenticationInfrastructureError,
+} from './request-authenticator';
 
-// ============================================================================
-// Injection Tokens
-// ============================================================================
-
-export const SESSION_REPOSITORY = Symbol('SESSION_REPOSITORY');
-export const AGENT_REPOSITORY = Symbol('AGENT_REPOSITORY');
-export const API_KEY_GENERATOR = Symbol('API_KEY_GENERATOR');
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const SESSION_COOKIE_NAME = 'fr_session';
-const AUTH_HEADER = 'authorization';
-const BEARER_PREFIX = 'Bearer ';
+// Injection tokens live with the authenticator now; re-exported so existing
+// imports (app.module, adapters/inbound/index) keep working unchanged.
+export {
+  SESSION_REPOSITORY,
+  AGENT_REPOSITORY,
+  API_KEY_GENERATOR,
+} from './request-authenticator';
 
 // ============================================================================
 // Extended Request Type
@@ -59,116 +55,35 @@ export interface AuthenticatedRequest extends Request {
  * Middleware that attempts to authenticate the request.
  * Sets req.actor if authentication succeeds.
  * Does NOT block unauthenticated requests - use AuthGuard for that.
+ *
+ * Infrastructure failures are logged and the request continues without an
+ * actor — by design, because this middleware runs on every route including
+ * public ones, and enforcement belongs to AuthGuard (which turns the same
+ * failure into a 503). What changed vs. the original: the failure is no
+ * longer swallowed silently (THE-67 / #28).
  */
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(
-    @Inject(SESSION_REPOSITORY)
-    private readonly sessionRepository: SessionRepository,
-    @Inject(AGENT_REPOSITORY)
-    private readonly agentRepository: AgentRepository,
-    @Inject(API_KEY_GENERATOR)
-    private readonly apiKeyGenerator: ApiKeyGeneratorPort,
-  ) {}
+  private readonly logger = new Logger(AuthMiddleware.name);
+
+  constructor(private readonly authenticator: RequestAuthenticator) {}
 
   async use(req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> {
     try {
-      // Try session cookie first
-      const sessionToken = this.extractSessionToken(req);
-      if (sessionToken) {
-        const context = await this.authenticateSession(sessionToken);
-        if (context) {
-          req.actor = context;
-          return next();
-        }
+      const context = await this.authenticator.authenticate(req);
+      if (context) {
+        req.actor = context;
       }
-
-      // Try API key header
-      const apiKey = this.extractApiKey(req);
-      if (apiKey) {
-        const context = await this.authenticateApiKey(apiKey);
-        if (context) {
-          req.actor = context;
-          return next();
-        }
+    } catch (error) {
+      if (error instanceof AuthenticationInfrastructureError) {
+        // Log loudly (no credential material in the message), continue
+        // unauthenticated; guarded routes will 503 in AuthGuard.
+        this.logger.error(error.message, (error.cause as Error)?.stack);
+      } else {
+        this.logger.error('Unexpected error during authentication', (error as Error)?.stack);
       }
-
-      // No authentication provided or invalid
-      next();
-    } catch {
-      // Continue without authentication on error
-      next();
     }
-  }
-
-  private extractSessionToken(req: Request): string | null {
-    const cookies = req.cookies as Record<string, string> | undefined;
-    return cookies?.[SESSION_COOKIE_NAME] ?? null;
-  }
-
-  private extractApiKey(req: Request): string | null {
-    const authHeader = req.headers[AUTH_HEADER];
-    if (typeof authHeader !== 'string') {
-      return null;
-    }
-    if (!authHeader.startsWith(BEARER_PREFIX)) {
-      return null;
-    }
-    return authHeader.slice(BEARER_PREFIX.length);
-  }
-
-  private async authenticateSession(token: string): Promise<ActorContext | null> {
-    const session = await this.sessionRepository.findByToken(token);
-    if (!session) {
-      return null;
-    }
-
-    // Check expiration
-    if (session.isExpired()) {
-      return null;
-    }
-
-    // Update last accessed
-    session.touch();
-    await this.sessionRepository.save(session);
-
-    return {
-      actorId: session.actorId,
-      actorType: session.actorType,
-      sessionToken: createSessionToken(token),
-    };
-  }
-
-  private async authenticateApiKey(key: string): Promise<ActorContext | null> {
-    // Validate format
-    if (!this.apiKeyGenerator.isValid(key)) {
-      return null;
-    }
-
-    // Extract prefix for lookup
-    const prefix = this.apiKeyGenerator.extractPrefix(key);
-
-    // Find agent by prefix
-    const agent = await this.agentRepository.findByApiKeyPrefix(prefix);
-    if (!agent) {
-      return null;
-    }
-
-    // Verify full hash
-    const keyHash = this.apiKeyGenerator.hash(key as ApiKey);
-    if (keyHash !== agent.apiKeyHash) {
-      return null;
-    }
-
-    // Check if active
-    if (!agent.isActive) {
-      return null;
-    }
-
-    return {
-      actorId: agent.id,
-      actorType: 'agent',
-    };
+    next();
   }
 }
 
@@ -182,14 +97,9 @@ export class AuthMiddleware implements NestMiddleware {
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    @Inject(SESSION_REPOSITORY)
-    private readonly sessionRepository: SessionRepository,
-    @Inject(AGENT_REPOSITORY)
-    private readonly agentRepository: AgentRepository,
-    @Inject(API_KEY_GENERATOR)
-    private readonly apiKeyGenerator: ApiKeyGeneratorPort,
-  ) {}
+  private readonly logger = new Logger(AuthGuard.name);
+
+  constructor(private readonly authenticator: RequestAuthenticator) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -199,85 +109,25 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    // Try session cookie
-    const sessionToken = this.extractSessionToken(request);
-    if (sessionToken) {
-      const actorContext = await this.authenticateSession(sessionToken);
-      if (actorContext) {
-        request.actor = actorContext;
-        return true;
+    let actorContext: ActorContext | null;
+    try {
+      actorContext = await this.authenticator.authenticate(request);
+    } catch (error) {
+      if (error instanceof AuthenticationInfrastructureError) {
+        // "The platform cannot check your credentials" is not "you are
+        // not logged in" — surface it as service unavailability, not 401.
+        this.logger.error(error.message, (error.cause as Error)?.stack);
+        throw new ServiceUnavailableException('Authentication is temporarily unavailable');
       }
+      throw error;
     }
 
-    // Try API key
-    const apiKey = this.extractApiKey(request);
-    if (apiKey) {
-      const actorContext = await this.authenticateApiKey(apiKey);
-      if (actorContext) {
-        request.actor = actorContext;
-        return true;
-      }
+    if (actorContext) {
+      request.actor = actorContext;
+      return true;
     }
 
     throw new UnauthorizedException('Authentication required');
-  }
-
-  private extractSessionToken(req: Request): string | null {
-    const cookies = req.cookies as Record<string, string> | undefined;
-    return cookies?.[SESSION_COOKIE_NAME] ?? null;
-  }
-
-  private extractApiKey(req: Request): string | null {
-    const authHeader = req.headers[AUTH_HEADER];
-    if (typeof authHeader !== 'string') {
-      return null;
-    }
-    if (!authHeader.startsWith(BEARER_PREFIX)) {
-      return null;
-    }
-    return authHeader.slice(BEARER_PREFIX.length);
-  }
-
-  private async authenticateSession(token: string): Promise<ActorContext | null> {
-    const session = await this.sessionRepository.findByToken(token);
-    if (!session || session.isExpired()) {
-      return null;
-    }
-
-    session.touch();
-    await this.sessionRepository.save(session);
-
-    return {
-      actorId: session.actorId,
-      actorType: session.actorType,
-      sessionToken: createSessionToken(token),
-    };
-  }
-
-  private async authenticateApiKey(key: string): Promise<ActorContext | null> {
-    if (!this.apiKeyGenerator.isValid(key)) {
-      return null;
-    }
-
-    const prefix = this.apiKeyGenerator.extractPrefix(key);
-    const agent = await this.agentRepository.findByApiKeyPrefix(prefix);
-    if (!agent) {
-      return null;
-    }
-
-    const keyHash = this.apiKeyGenerator.hash(key as ApiKey);
-    if (keyHash !== agent.apiKeyHash) {
-      return null;
-    }
-
-    if (!agent.isActive) {
-      return null;
-    }
-
-    return {
-      actorId: agent.id,
-      actorType: 'agent',
-    };
   }
 }
 

@@ -3,10 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { UnauthorizedException, ExecutionContext } from '@nestjs/common';
+import { UnauthorizedException, ServiceUnavailableException, ExecutionContext, Logger } from '@nestjs/common';
 import { AuthMiddleware, AuthGuard } from './auth.middleware';
+import { RequestAuthenticator, TOUCH_INTERVAL_MS } from './request-authenticator';
 import type { AuthenticatedRequest } from './auth.middleware';
 import type { Response, NextFunction } from 'express';
+
+// Silence Nest logger output for the infra-failure tests
+Logger.overrideLogger(false);
 import type { SessionRepository } from '../../application/ports/session.repository';
 import type { AgentRepository } from '../../application/ports/agent.repository';
 import type { ApiKeyGeneratorPort } from '../../application/ports/api-key-generator.port';
@@ -90,6 +94,7 @@ function createMockSession(props: {
   actorId: ActorId;
   actorType: 'user' | 'agent';
   isExpired?: boolean;
+  lastAccessedAt?: Date;
 }): Session {
   const now = new Date();
   const expiresAt = props.isExpired
@@ -103,7 +108,7 @@ function createMockSession(props: {
     tokenHash: 'abc123hash',
     expiresAt,
     createdAt: now,
-    lastAccessedAt: now,
+    lastAccessedAt: props.lastAccessedAt ?? now,
     userAgent: null,
     ipAddress: null,
   });
@@ -144,7 +149,9 @@ describe('AuthMiddleware', () => {
     sessionRepository = createMockSessionRepository();
     agentRepository = createMockAgentRepository();
     apiKeyGenerator = createMockApiKeyGenerator();
-    middleware = new AuthMiddleware(sessionRepository, agentRepository, apiKeyGenerator);
+    middleware = new AuthMiddleware(
+      new RequestAuthenticator(sessionRepository, agentRepository, apiKeyGenerator),
+    );
   });
 
   it('should authenticate via session cookie', async () => {
@@ -168,7 +175,68 @@ describe('AuthMiddleware', () => {
     expect(req.actor?.actorId).toBe(actorId);
     expect(req.actor?.actorType).toBe('user');
     expect(next).toHaveBeenCalled();
-    expect(sessionRepository.save).toHaveBeenCalled(); // Touch session
+    // Freshly-touched session: within TOUCH_INTERVAL_MS, so no write (THE-69)
+    expect(sessionRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should touch the session when lastAccessedAt is stale', async () => {
+    const actorId = createActorId('550e8400-e29b-41d4-a716-446655440001');
+    const session = createMockSession({
+      actorId,
+      actorType: 'user',
+      lastAccessedAt: new Date(Date.now() - TOUCH_INTERVAL_MS - 1000),
+    });
+
+    vi.mocked(sessionRepository.findByToken).mockResolvedValue(session);
+
+    const req = createMockRequest({
+      cookies: { fr_session: 'valid-session-token-that-is-at-least-32-characters-long' },
+    });
+
+    await middleware.use(req, createMockResponse(), createMockNext());
+
+    expect(req.actor?.actorId).toBe(actorId);
+    expect(sessionRepository.save).toHaveBeenCalledTimes(1);
+  });
+
+  it('should still authenticate when the touch write fails', async () => {
+    const actorId = createActorId('550e8400-e29b-41d4-a716-446655440001');
+    const session = createMockSession({
+      actorId,
+      actorType: 'user',
+      lastAccessedAt: new Date(Date.now() - TOUCH_INTERVAL_MS - 1000),
+    });
+
+    vi.mocked(sessionRepository.findByToken).mockResolvedValue(session);
+    vi.mocked(sessionRepository.save).mockRejectedValue(new Error('write timeout'));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const req = createMockRequest({
+      cookies: { fr_session: 'valid-session-token-that-is-at-least-32-characters-long' },
+    });
+
+    await middleware.use(req, createMockResponse(), createMockNext());
+
+    // Auth succeeded despite the bookkeeping write failing
+    expect(req.actor?.actorId).toBe(actorId);
+    consoleError.mockRestore();
+  });
+
+  it('should log and continue unauthenticated on a session lookup infrastructure failure', async () => {
+    vi.mocked(sessionRepository.findByToken).mockRejectedValue(
+      new Error('connection refused'),
+    );
+
+    const req = createMockRequest({
+      cookies: { fr_session: 'valid-session-token-that-is-at-least-32-characters-long' },
+    });
+    const next = createMockNext();
+
+    // Must not throw: middleware annotates, guards enforce
+    await middleware.use(req, createMockResponse(), next);
+
+    expect(req.actor).toBeUndefined();
+    expect(next).toHaveBeenCalled();
   });
 
   it('should not authenticate with expired session', async () => {
@@ -311,7 +379,9 @@ describe('AuthGuard', () => {
     sessionRepository = createMockSessionRepository();
     agentRepository = createMockAgentRepository();
     apiKeyGenerator = createMockApiKeyGenerator();
-    guard = new AuthGuard(sessionRepository, agentRepository, apiKeyGenerator);
+    guard = new AuthGuard(
+      new RequestAuthenticator(sessionRepository, agentRepository, apiKeyGenerator),
+    );
   });
 
   it('should allow request with valid session cookie', async () => {
@@ -421,5 +491,35 @@ describe('AuthGuard', () => {
     const context = createMockExecutionContext(req);
 
     await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('should throw ServiceUnavailableException (not 401) on session lookup infrastructure failure', async () => {
+    // A database outage is not "you are not logged in" (THE-67 / #28)
+    vi.mocked(sessionRepository.findByToken).mockRejectedValue(
+      new Error('connection refused'),
+    );
+
+    const req = createMockRequest({
+      cookies: { fr_session: 'valid-session-token-that-is-at-least-32-characters-long' },
+    });
+    const context = createMockExecutionContext(req);
+
+    await expect(guard.canActivate(context)).rejects.toThrow(ServiceUnavailableException);
+    await expect(guard.canActivate(context)).rejects.not.toThrow(UnauthorizedException);
+  });
+
+  it('should throw ServiceUnavailableException on agent lookup infrastructure failure', async () => {
+    vi.mocked(apiKeyGenerator.isValid).mockReturnValue(true);
+    vi.mocked(apiKeyGenerator.extractPrefix).mockReturnValue('fr_live');
+    vi.mocked(agentRepository.findByApiKeyPrefix).mockRejectedValue(
+      new Error('pool exhausted'),
+    );
+
+    const req = createMockRequest({
+      headers: { authorization: 'Bearer fr_live_key123' },
+    });
+    const context = createMockExecutionContext(req);
+
+    await expect(guard.canActivate(context)).rejects.toThrow(ServiceUnavailableException);
   });
 });
