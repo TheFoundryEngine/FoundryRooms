@@ -49,6 +49,9 @@ jobs:
             echo "::error::DATABASE_URL secret is not set — refusing to deploy without running migrations."
             exit 1
           fi
+          # drizzle-kit push exits 1 with no output when the connection
+          # fails; the preflight prints a sanitized reason first.
+          node scripts/db-preflight.mjs
           npx drizzle-kit push
 
       - name: Trigger Render deploy
