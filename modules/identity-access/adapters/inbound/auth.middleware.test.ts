@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Auth Middleware Tests
  */
 

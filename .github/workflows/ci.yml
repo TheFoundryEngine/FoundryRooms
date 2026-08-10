@@ -93,7 +93,9 @@ jobs:
       - run: npm ci
       # tests/contract is the canonical suite (consolidation with tests/contracts: #20 / THE-59).
       # No --passWithNoTests: the directory is non-empty, and an emptied suite must fail.
-      - run: npx vitest run tests/contract
+      # Trailing slash anchors vitest's substring filter to the directory —
+      # a bare "tests/contract" would also match a sibling like tests/contracts/ (#62).
+      - run: npx vitest run tests/contract/
 
   architecture-tests:
     name: architecture-tests
