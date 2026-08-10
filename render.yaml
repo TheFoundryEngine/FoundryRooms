@@ -4,7 +4,9 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/v1/auth/health
+    # Readiness (probes the database), not just liveness — a DB-less
+    # instance must leave rotation. /api/v1/auth/health remains an alias.
+    healthCheckPath: /api/v1/health/ready
     envVars:
       - key: DATABASE_URL
         sync: false
