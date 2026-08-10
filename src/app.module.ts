@@ -1,15 +1,7 @@
-import { Module, NestModule, MiddlewareConsumer, Controller, Get } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
-
-@Controller('auth/health')
-class HealthController {
-  @Get()
-  healthCheck() {
-    // Governor review test v3 — verify free model fallback chain
-    return { status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() };
-  }
-}
+import { HealthController } from './health.controller';
 
 import {
   AuthController,
