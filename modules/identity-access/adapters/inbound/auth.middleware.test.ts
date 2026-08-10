@@ -1,10 +1,12 @@
-/**
+﻿/**
  * Auth Middleware Tests
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UnauthorizedException, ExecutionContext } from '@nestjs/common';
 import { AuthMiddleware, AuthGuard } from './auth.middleware';
+import type { AuthenticatedRequest } from './auth.middleware';
+import type { Response, NextFunction } from 'express';
 import type { SessionRepository } from '../../application/ports/session.repository';
 import type { AgentRepository } from '../../application/ports/agent.repository';
 import type { ApiKeyGeneratorPort } from '../../application/ports/api-key-generator.port';
@@ -52,23 +54,23 @@ function createMockApiKeyGenerator(): ApiKeyGeneratorPort {
   };
 }
 
-function createMockRequest(overrides: Record<string, unknown> = {}): any {
+function createMockRequest(overrides: Record<string, unknown> = {}): AuthenticatedRequest {
   return {
     cookies: {},
     headers: {},
     ...overrides,
-  };
+  } as unknown as AuthenticatedRequest;
 }
 
-function createMockResponse(): any {
-  return {};
+function createMockResponse(): Response {
+  return {} as Response;
 }
 
-function createMockNext(): any {
-  return vi.fn();
+function createMockNext(): NextFunction {
+  return vi.fn() as unknown as NextFunction;
 }
 
-function createMockExecutionContext(request: any): ExecutionContext {
+function createMockExecutionContext(request: AuthenticatedRequest): ExecutionContext {
   return {
     switchToHttp: () => ({
       getRequest: () => request,
@@ -163,8 +165,8 @@ describe('AuthMiddleware', () => {
     await middleware.use(req, res, next);
 
     expect(req.actor).toBeDefined();
-    expect(req.actor.actorId).toBe(actorId);
-    expect(req.actor.actorType).toBe('user');
+    expect(req.actor?.actorId).toBe(actorId);
+    expect(req.actor?.actorType).toBe('user');
     expect(next).toHaveBeenCalled();
     expect(sessionRepository.save).toHaveBeenCalled(); // Touch session
   });
@@ -213,8 +215,8 @@ describe('AuthMiddleware', () => {
     await middleware.use(req, res, next);
 
     expect(req.actor).toBeDefined();
-    expect(req.actor.actorId).toBe(agentId);
-    expect(req.actor.actorType).toBe('agent');
+    expect(req.actor?.actorId).toBe(agentId);
+    expect(req.actor?.actorType).toBe('agent');
     expect(next).toHaveBeenCalled();
   });
 
@@ -288,8 +290,8 @@ describe('AuthMiddleware', () => {
 
     await middleware.use(req, res, next);
 
-    expect(req.actor.actorId).toBe(userId);
-    expect(req.actor.actorType).toBe('user');
+    expect(req.actor?.actorId).toBe(userId);
+    expect(req.actor?.actorType).toBe('user');
     // API key should not be checked
     expect(agentRepository.findByApiKeyPrefix).not.toHaveBeenCalled();
   });
@@ -330,7 +332,7 @@ describe('AuthGuard', () => {
 
     expect(result).toBe(true);
     expect(req.actor).toBeDefined();
-    expect(req.actor.actorId).toBe(actorId);
+    expect(req.actor?.actorId).toBe(actorId);
   });
 
   it('should allow request with valid API key', async () => {
@@ -355,7 +357,7 @@ describe('AuthGuard', () => {
 
     expect(result).toBe(true);
     expect(req.actor).toBeDefined();
-    expect(req.actor.actorId).toBe(agentId);
+    expect(req.actor?.actorId).toBe(agentId);
   });
 
   it('should return true if already authenticated by middleware', async () => {
