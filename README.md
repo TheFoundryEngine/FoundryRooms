@@ -19,18 +19,15 @@ FoundryRooms/
 ├── .husky/                # Git hooks (pre-commit, pre-push)
 ├── src/                   # Backend app entrypoint (NestJS bootstrap)
 ├── modules/               # Backend bounded contexts (modular monolith)
-│   ├── identity-access/   #   Domain → Application → Adapters → Contracts
-│   ├── community-structure/
-│   ├── engagement/
-│   ├── resources/
-│   ├── events/
-│   ├── commerce/
-│   ├── automation/
-│   ├── admin-reporting/
-│   └── .../
+│   ├── identity-access/   #   Implemented: Domain → Application → Adapters → Contracts
+│   ├── community-structure/  # Stub
+│   ├── events/            #   Stub
+│   ├── commerce/          #   Stub
+│   ├── automation/        #   Stub
+│   └── admin-reporting/   #   Stub (see Bounded Contexts table below)
 ├── contracts/             # Shared API contracts, events, fixtures, mocks
 ├── design/                # Design system, tokens, UX specs (Team D)
-├── tests/                 # Architecture, contract, integration, e2e tests
+├── tests/                 # Architecture, contract, and unit test suites
 ├── docs/                  # Specs, governance, and ADRs
 └── scripts/               # Dev and deployment scripts
 ```
@@ -51,15 +48,20 @@ FoundryRooms is built as a **modular monolith** with:
 
 ### Bounded Contexts
 
-- **Identity & Access** - authentication, roles, permissions
-- **Community Structure** - communities, spaces, channels
-- **Engagement** - posts, threads, reactions, feeds
-- **Resources** - documents and content management
-- **Events** - event creation, RSVP, attendance
-- **Commerce** - memberships, payments, entitlements
-- **Notifications** - in-app and email notifications
-- **Automation** - workflow rules and background jobs
-- **Admin & Reporting** - moderation and analytics
+| Context | Scope | Status |
+|---|---|---|
+| **Identity & Access** | authentication, roles, permissions | **Implemented** (auth vertical) |
+| **Community Structure** | communities, spaces, channels | Stub (contracts + fixtures exist) |
+| **Events** | event creation, RSVP, attendance | Stub (contracts + fixtures exist) |
+| **Commerce** | memberships, payments, entitlements | Stub (contracts + fixtures exist) |
+| **Automation** | workflow rules and background jobs | Stub |
+| **Admin & Reporting** | moderation and analytics | Stub |
+| **Engagement** | posts, threads, reactions, feeds | Planned — no module yet |
+| **Resources** | documents and content management | Planned — no module yet |
+| **Notifications** | in-app and email notifications | Planned — no module yet |
+
+"Stub" means the module directory exists with a placeholder index only —
+no domain, application, or adapter code yet.
 
 ### Boundary enforcement
 
@@ -104,8 +106,8 @@ Push to main (or PR → main)
     │
     ├──► CI workflow (.github/workflows/ci.yml)
     │      ├── lint
-    │      ├── unit-tests (433 tests via vitest)
-    │      ├── integration-tests (PostgreSQL service container)
+    │      ├── unit-tests (vitest; run `npm test` for the current count)
+    │      ├── integration-tests (PostgreSQL service container; suite pending, see #23)
     │      ├── contract-tests
     │      ├── architecture-tests
     │      └── build + typecheck (gated on all above passing)
@@ -126,7 +128,8 @@ Push to main (or PR → main)
 | **Neon** | PostgreSQL database | Free (500MB, always-on) |
 
 - **API URL**: https://foundryrooms-api.onrender.com
-- **Health check**: `/api/v1/auth/health`
+- **Health checks**: `/api/v1/health/ready` (readiness — probes the database; used by Render),
+  `/api/v1/health/live` (liveness), `/api/v1/auth/health` (legacy alias for readiness)
 
 ### Required GitHub Secrets
 
@@ -284,4 +287,6 @@ See [Development Governance](docs/governance/DEVELOPMENT_GOVERNANCE.md) for deta
 
 ## License
 
-[To be determined]
+This repository is distributed under the terms in [LICENSE](LICENSE) — the
+**Space Child License, Version 1.0** (March 2026). It is a custom license, not
+an OSI-approved one; read it before adopting or contributing.
