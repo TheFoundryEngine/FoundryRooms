@@ -1,4 +1,4 @@
-# FoundryRooms — ADR Index
+﻿# FoundryRooms â€” ADR Index
 
 This index tracks all Architecture Decision Records across global and team scopes.
 It prevents numbering clashes and provides a single view of all architectural decisions.
@@ -16,26 +16,26 @@ anyone on the team can pick up.
 
 | Team | Linear Project | URL |
 |------|---------------|-----|
-| Team A — Community Core | Team A — Community Core ADRs | https://linear.app/thefoundryengine/project/team-a-community-core-adrs-3fae2d82bab2 |
-| Team B — Experience | Team B — Experience ADRs | https://linear.app/thefoundryengine/project/team-b-experience-adrs-bbe1f8999a31 |
-| Team C — Ops & Monetization | Team C — Ops & Monetization ADRs | https://linear.app/thefoundryengine/project/team-c-ops-and-monetization-adrs-8d88b427cbd3 |
-| Team D — Design & UX | Team D — Design & UX ADRs | https://linear.app/thefoundryengine/project/team-d-design-and-ux-adrs-5006b13b87ec |
-| Governor | Governor — Architecture & Governance ADRs | https://linear.app/thefoundryengine/project/governor-architecture-and-governance-adrs-57ff65c03c05 |
+| Team A â€” Community Core | Team A â€” Community Core ADRs | https://linear.app/thefoundryengine/project/team-a-community-core-adrs-3fae2d82bab2 |
+| Team B â€” Experience | Team B â€” Experience ADRs | https://linear.app/thefoundryengine/project/team-b-experience-adrs-bbe1f8999a31 |
+| Team C â€” Ops & Monetization | Team C â€” Ops & Monetization ADRs | https://linear.app/thefoundryengine/project/team-c-ops-and-monetization-adrs-8d88b427cbd3 |
+| Team D â€” Design & UX | Team D â€” Design & UX ADRs | https://linear.app/thefoundryengine/project/team-d-design-and-ux-adrs-5006b13b87ec |
+| Governor | Governor â€” Architecture & Governance ADRs | https://linear.app/thefoundryengine/project/governor-architecture-and-governance-adrs-57ff65c03c05 |
 
 ### Linear labels
 
 | Label | Purpose |
 |-------|---------|
 | `adr` | Issue is an ADR parent or ADR-related work |
-| `team-a` | Team A — Community Core |
-| `team-b` | Team B — Experience |
-| `team-c` | Team C — Ops & Monetization |
-| `team-d` | Team D — Design & UX |
-| `governor` | Governor Agent — global ADRs and governance |
-| `wave-0` | Wave 0 — Foundation |
-| `wave-1` | Wave 1 — Core viability |
-| `wave-2` | Wave 2 — Monetization and operational readiness |
-| `wave-3` | Wave 3 — Experience hardening |
+| `team-a` | Team A â€” Community Core |
+| `team-b` | Team B â€” Experience |
+| `team-c` | Team C â€” Ops & Monetization |
+| `team-d` | Team D â€” Design & UX |
+| `governor` | Governor Agent â€” global ADRs and governance |
+| `wave-0` | Wave 0 â€” Foundation |
+| `wave-1` | Wave 1 â€” Core viability |
+| `wave-2` | Wave 2 â€” Monetization and operational readiness |
+| `wave-3` | Wave 3 â€” Experience hardening |
 
 ---
 
@@ -48,7 +48,7 @@ Location: `docs/adr/global/`
 
 | ADR | Title | Status | Date | File |
 |-----|-------|--------|------|------|
-| ADR-001 | System Shape — Modular Monolith with DDD and Hexagonal Boundaries | Accepted | 2026-04-02 | `ADR-001-system-shape.md` |
+| ADR-001 | System Shape â€” Modular Monolith with DDD and Hexagonal Boundaries | Accepted | 2026-04-02 | `ADR-001-system-shape.md` |
 | ADR-002 | Initial Bounded Context Map and Team Ownership | Accepted | 2026-04-02 | `ADR-002-bounded-context-map.md` |
 | ADR-003 | Relational Data Architecture and Tenancy Model | Accepted | 2026-04-02 | `ADR-003-data-and-tenancy-model.md` |
 | ADR-004 | Integration, Contracts, Events, and Parallel Delivery Model | Accepted | 2026-04-02 | `ADR-004-integration-and-contract-model.md` |
@@ -60,6 +60,7 @@ Location: `docs/adr/global/`
 | ADR-010 | Database Access Strategy and Model Synchronization | Accepted | 2026-04-02 | `ADR-010-database-access-strategy-and-model-synchronization.md` |
 | ADR-011 | Background Jobs and Workflow Execution | Accepted | 2026-04-02 | `ADR-011-background-jobs-and-workflow-execution.md` |
 | ADR-012 | Interaction Model and Delivery Semantics | Accepted | 2026-04-02 | `ADR-012-interaction-model-and-delivery-semantics.md` |
+| ADR-013 | Composition Root and Worker Boundary Rules | Proposed | 2026-08-10 | `ADR-013-composition-root-and-worker-boundaries.md` |
 
 ### Reserved (not yet created)
 
@@ -76,7 +77,7 @@ Location: `docs/adr/global/`
 Feature ADRs are owned end-to-end by exactly one team.
 Naming convention: `ADR-F-{team}-{number}-{slug}.md`
 
-### Team A — Community Core
+### Team A â€” Community Core
 
 Location: `docs/adr/features/team-a-community-core/`
 
@@ -84,7 +85,7 @@ Location: `docs/adr/features/team-a-community-core/`
 |-----|-------|--------|------|--------|------|
 | ADR-F-A-001 | Auth and Session Foundation | Proposed | 2026-08-05 | [THE-5](https://linear.app/thefoundryengine/issue/THE-5/adr-f-a-001-auth-and-session-foundation) | `ADR-F-A-001-auth-and-session-foundation.md` |
 
-### Team B — Experience
+### Team B â€” Experience
 
 Location: `docs/adr/features/team-b-experience/`
 
@@ -92,7 +93,7 @@ Location: `docs/adr/features/team-b-experience/`
 |-----|-------|--------|------|--------|------|
 | ADR-F-B-001 | Frontend Shell and Route Scaffolding | Proposed | 2026-08-05 | [THE-6](https://linear.app/thefoundryengine/issue/THE-6/adr-f-b-001-frontend-shell-and-route-scaffolding) | `ADR-F-B-001-frontend-shell-and-route-scaffolding.md` |
 
-### Team C — Operations & Monetization
+### Team C â€” Operations & Monetization
 
 Location: `docs/adr/features/team-c-ops-monetization/`
 
@@ -100,7 +101,7 @@ Location: `docs/adr/features/team-c-ops-monetization/`
 |-----|-------|--------|------|--------|------|
 | ADR-F-C-001 | Worker and Job Runtime Baseline | Proposed | 2026-08-05 | [THE-7](https://linear.app/thefoundryengine/issue/THE-7/adr-f-c-001-worker-and-job-runtime-baseline) | `ADR-F-C-001-worker-and-job-runtime-baseline.md` |
 
-### Team D — Design & UX
+### Team D â€” Design & UX
 
 Location: `docs/adr/features/team-d-design-ux/`
 
@@ -114,7 +115,7 @@ Location: `docs/adr/features/team-d-design-ux/`
 
 1. **Global ADRs** use sequential numbers: `ADR-001`, `ADR-002`, ... `ADR-015`, etc.
    - Next available: **ADR-013**
-   - Reserved numbers (013–015) must not be reused or skipped
+   - Reserved numbers (013â€“015) must not be reused or skipped
 
 2. **Team A feature ADRs** use: `ADR-F-A-001`, `ADR-F-A-002`, ...
    - Next available: **ADR-F-A-002**
@@ -139,7 +140,7 @@ Location: `docs/adr/features/team-d-design-ux/`
 
 ---
 
-## Workflow: ADR → Linear Parent Issue → Sub-Issues → Branch → PR → Merge
+## Workflow: ADR â†’ Linear Parent Issue â†’ Sub-Issues â†’ Branch â†’ PR â†’ Merge
 
 ```
 1. Team identifies a task or issue requiring an architectural decision
@@ -149,7 +150,7 @@ Location: `docs/adr/features/team-d-design-ux/`
    - Update this index in the same PR
 3. ADR is reviewed by the team's human developer
 4. Governor Agent reviews the ADR if it touches contracts, schema, or cross-context rules
-5. ADR is accepted → create a parent issue in the team's Linear ADR project
+5. ADR is accepted â†’ create a parent issue in the team's Linear ADR project
    - Title: "ADR-F-{TEAM}-{NNN}: {ADR title}"
    - Description: link to ADR file + summary of decision
    - Labels: adr, team-{a/b/c/d}, wave-{N}
@@ -165,7 +166,7 @@ Location: `docs/adr/features/team-d-design-ux/`
    - PR references Linear sub-issue (e.g., "Closes THE-12")
    - Governor Agent reviews PR for ADR compliance
    - CI checks run (lint, tests, build, typecheck, arch:test)
-10. Auto-merge: all checks pass + approval received → squash merge into main
+10. Auto-merge: all checks pass + approval received â†’ squash merge into main
 11. Linear sub-issue auto-closes via PR reference
 12. When all sub-issues under an ADR parent issue are closed,
     the parent issue (and ADR) is marked Done

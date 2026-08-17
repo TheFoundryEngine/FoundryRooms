@@ -32,7 +32,7 @@ interface Violation {
   to: string;
 }
 
-const CRUISE_TARGETS = ['src/', 'modules/', 'contracts/'];
+const CRUISE_TARGETS = ['src/', 'modules/', 'contracts/', 'worker/'];
 
 /**
  * Every rule in .dependency-cruiser.js gets an entry here, with a short
@@ -50,6 +50,12 @@ const TESTED_RULES: Record<string, string> = {
   'contracts-must-not-import-drizzle': 'contracts never leak persistence models',
   'shared-contracts-must-not-import-module-internals':
     'shared contracts never reach into module domain or adapters',
+  'src-must-not-import-domain':
+    'the composition root wires adapters and use cases, never domain objects (ADR-013)',
+  'worker-must-not-import-module-internals':
+    'the worker consumes contracts, not context internals (ADR-013)',
+  'no-module-or-contract-imports-of-runtimes':
+    'modules and contracts never depend on src/ or worker/ (ADR-013)',
 };
 
 async function cruiseFor(targets: string[]): Promise<Violation[]> {
@@ -111,29 +117,49 @@ describe('architecture boundary rules', () => {
 });
 
 describe('rule engine sanity', () => {
-  it('flags a deliberately violating fixture — rules can actually fire', async () => {
+  it('flags deliberately violating fixtures — rules can actually fire', async () => {
     // A rule with a typo'd path regex that matches nothing is
-    // indistinguishable from a passing rule. This writes a file that
-    // violates three distinct rules, cruises it, and asserts each fires.
-    const fixture = join(
-      process.cwd(),
-      'modules',
-      'identity-access',
-      'domain',
-      '__arch-fixture-violation__.ts',
-    );
-    const content = [
+    // indistinguishable from a passing rule. This writes files that
+    // violate distinct rules, cruises them, and asserts each fires.
+    const fixtures = [
+      {
+        path: join(
+          process.cwd(),
+          'modules',
+          'identity-access',
+          'domain',
+          '__arch-fixture-violation__.ts',
+        ),
+        imports: [
+          "import '@nestjs/common';", //                 domain-must-not-import-frameworks
+          "import '../adapters/inbound';", //            domain-must-not-depend-on-adapters
+          "import '../../community-structure/index';", // no-cross-context-internal-imports
+          "import '../../../src/app.module';", //        no-module-or-contract-imports-of-runtimes
+        ],
+      },
+      {
+        path: join(process.cwd(), 'src', '__arch-fixture-violation__.ts'),
+        imports: [
+          "import '../modules/identity-access/domain/index';", // src-must-not-import-domain
+        ],
+      },
+      {
+        path: join(process.cwd(), 'worker', '__arch-fixture-violation__.ts'),
+        imports: [
+          "import '../modules/identity-access/application/ports/session.repository';", // worker-must-not-import-module-internals
+        ],
+      },
+    ];
+
+    const header = [
       '// Deliberately violating fixture written by boundary.test.ts.',
       '// It exists only for the duration of one test run and is deleted in finally.',
-      "import '@nestjs/common';", //                 domain-must-not-import-frameworks
-      "import '../adapters/inbound';", //            domain-must-not-depend-on-adapters
-      "import '../../community-structure/index';", // no-cross-context-internal-imports
-      'export {};',
-      '',
-    ].join('\n');
+    ];
 
-    writeFileSync(fixture, content);
     try {
+      for (const f of fixtures) {
+        writeFileSync(f.path, [...header, ...f.imports, 'export {};', ''].join('\n'));
+      }
       const fixtureViolations = (await cruiseFor(CRUISE_TARGETS)).filter((v) =>
         v.from.includes('__arch-fixture-violation__'),
       );
@@ -142,8 +168,13 @@ describe('rule engine sanity', () => {
       expect(fired).toContain('domain-must-not-import-frameworks');
       expect(fired).toContain('domain-must-not-depend-on-adapters');
       expect(fired).toContain('no-cross-context-internal-imports');
+      expect(fired).toContain('no-module-or-contract-imports-of-runtimes');
+      expect(fired).toContain('src-must-not-import-domain');
+      expect(fired).toContain('worker-must-not-import-module-internals');
     } finally {
-      rmSync(fixture, { force: true });
+      for (const f of fixtures) {
+        rmSync(f.path, { force: true });
+      }
     }
   }, 60_000);
 });
