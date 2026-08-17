@@ -77,9 +77,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      # --passWithNoTests: the integration suite does not exist yet (#23 / THE-62).
-      # Once tests/integration has files, remove the flag so an emptied suite fails.
-      - run: npx vitest run tests/integration --passWithNoTests
+      - run: npx vitest run tests/integration
 
   contract-tests:
     name: contract-tests
