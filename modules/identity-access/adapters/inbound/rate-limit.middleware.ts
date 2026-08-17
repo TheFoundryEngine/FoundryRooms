@@ -16,6 +16,7 @@ import {
   HttpStatus,
   Optional,
   Inject,
+  OnModuleDestroy,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
@@ -28,13 +29,52 @@ interface RateLimitEntry {
   resetAt: Date;
 }
 
+/** How often expired windows are swept out of the store. */
+const SWEEP_INTERVAL_MS = 60 * 1000;
+
 /**
  * In-memory rate limit store using a Map.
  * Tracks request counts per key with a sliding window.
+ *
+ * Expired windows are evicted by a periodic sweep so the key space
+ * (one entry per ip:path pair ever seen) cannot grow without bound
+ * over the lifetime of the process (THE-65 / #26).
+ *
+ * Note: per-instance only — counts do not survive a restart and are not
+ * shared across instances. Acceptable for a single-instance deployment;
+ * a shared store is needed before scaling out.
  */
 @Injectable()
-export class InMemoryRateLimitStore {
+export class InMemoryRateLimitStore implements OnModuleDestroy {
   private readonly entries = new Map<string, RateLimitEntry>();
+  private readonly sweepTimer: ReturnType<typeof setInterval>;
+
+  constructor() {
+    this.sweepTimer = setInterval(() => this.sweep(), SWEEP_INTERVAL_MS);
+    // The sweep must never keep the process alive on its own.
+    this.sweepTimer.unref?.();
+  }
+
+  /**
+   * Removes every entry whose window has expired.
+   * Runs on a timer; exposed for tests and manual eviction.
+   */
+  sweep(now: Date = new Date()): void {
+    for (const [key, entry] of this.entries) {
+      if (now >= entry.resetAt) {
+        this.entries.delete(key);
+      }
+    }
+  }
+
+  /** Number of tracked keys (active and not-yet-swept). */
+  get size(): number {
+    return this.entries.size;
+  }
+
+  onModuleDestroy(): void {
+    clearInterval(this.sweepTimer);
+  }
 
   /**
    * Increments the count for a key, resetting if the window has expired.
